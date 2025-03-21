@@ -30,13 +30,5 @@ class BaselineCNN(nn.Module):
 
         return x
     
-if __name__ == "__main__":
-    model = BaselineCNN()
-    print(model)
-
-    # Example forward pass
-    sample_input = torch.randn(1, 1, 28, 28)  # Simulated MNIST image
-    output = model(sample_input)
-    print("Output shape:", output.shape)  # Should be (1, 10)
 
 
