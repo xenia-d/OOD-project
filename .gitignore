@@ -15,3 +15,6 @@ __pycache__/
 # Ignore pyenv and pipenv environments
 .python-version
 Pipfile.lock
+
+
+data/

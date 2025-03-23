@@ -20,9 +20,7 @@ class BaselineCNN(nn.Module):
         x = self.pool(F.relu(self.conv1(x)))  
         x = self.pool(F.relu(self.conv2(x)))  
 
-        print("Shape before flattening:", x.shape) 
         x = torch.flatten(x, start_dim=1)  
-        print("Shape after flattening:", x.shape) 
 
         x = F.relu(self.fc1(x))
         x = self.dropout(x)
