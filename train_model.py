@@ -60,7 +60,7 @@ def test_model(model, test_dataset, device):
             all_labels.extend(labels.cpu().numpy())
 
     accuracy = 100 * correct / total
-    f1 = f1_score(all_labels, all_preds, average=None)  
+    f1 = f1_score(all_labels, all_preds, average='weighted')  
 
     print(f'Accuracy on test set: {accuracy:.2f}%')
     print(f'F1-Score on test set: {f1:.4f}')
