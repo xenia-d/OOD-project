@@ -1,0 +1,17 @@
+# Ignore virtual environment folder (commonly named venv, env, etc.)
+venv/
+env/
+.venv/
+.env/
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore pyenv and pipenv environments
+.python-version
+Pipfile.lock

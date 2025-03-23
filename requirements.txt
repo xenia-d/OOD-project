@@ -1,0 +1,7 @@
+torch==2.0.1
+torchvision==0.15.2
+numpy<2  # To avoid NumPy 2.x compatibility issues
+scikit-learn==1.3.0
+scipy==1.11.2
+matplotlib==3.7.2
+pillow==10.0.0
