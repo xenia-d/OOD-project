@@ -5,8 +5,10 @@ import torchvision.transforms as transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
-from Models.baseline_cnn import BaselineCNN
+from Model_Architecture.baseline_cnn import BaselineCNN
 from sklearn.metrics import f1_score
+from Data.preprocess import inspect_class_distribution
+from pickle import dump
 
 
 def train_model(model, train_data, device, epochs):
@@ -28,8 +30,8 @@ def train_model(model, train_data, device, epochs):
             optimizer.step()
 
             running_loss += loss.item()
-            if i % 100 == 99:  # Print loss every 100 batches
-                print(f'[{epoch + 1}, {i + 1}] loss: {running_loss / 100:.4f}')
+            if i % 64 == 63:  # Print loss every 64 batches
+                print(f'[{epoch + 1}, {i + 1}] loss: {running_loss / 64:.4f}')
                 running_loss = 0.0
 
     print("It finished training")
@@ -58,7 +60,7 @@ def test_model(model, test_dataset, device):
             all_labels.extend(labels.cpu().numpy())
 
     accuracy = 100 * correct / total
-    f1 = f1_score(all_labels, all_preds, average="weighted")  # the F1-score is weighted to consider class imbalance
+    f1 = f1_score(all_labels, all_preds, average=None)  
 
     print(f'Accuracy on test set: {accuracy:.2f}%')
     print(f'F1-Score on test set: {f1:.4f}')
@@ -74,7 +76,10 @@ if __name__ == "__main__":
     train_data = datasets.MNIST(root='Data', train=True, download=True, transform=transform)
     test_data = datasets.MNIST(root='Data', train=False, download=True, transform=transform)
 
+    inspect_class_distribution(train_data, "Training Data Distribution")
+    inspect_class_distribution(test_data, "Test Data Distribution")
+
     train_model(model, train_data, device, epochs=5)
     test_model(model, test_data, device)
 
-
+    torch.save(model.state_dict(), "Saved_Models/baseline_cnn.pth")
