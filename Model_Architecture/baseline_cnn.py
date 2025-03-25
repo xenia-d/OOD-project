@@ -3,6 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
 
+
+# inspiration from https://github.com/pytorch/examples/blob/main/mnist/main.py 
+
 class BaselineCNN(nn.Module):
     def __init__(self):
         super(BaselineCNN, self).__init__()
@@ -17,16 +20,25 @@ class BaselineCNN(nn.Module):
         self.dropout = nn.Dropout(0.5)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))  
-        x = self.pool(F.relu(self.conv2(x)))  
+        x = self.conv1(x)
+        x = F.relu(x)
+        x = self.pool(x)
 
-        x = torch.flatten(x, start_dim=1)  
+        x = self.conv2(x)
+        x = F.relu(x)
+        x = self.pool(x)
 
-        x = F.relu(self.fc1(x))
+        x = torch.flatten(x, start_dim=1)
+
+        x = self.fc1(x)
+        x = F.relu(x)
         x = self.dropout(x)
-        x = self.fc2(x)  
 
-        return x
+        x = self.fc2(x)
+        output = F.log_softmax(x, dim=1)
+
+        return output
+
     
 
 

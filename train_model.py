@@ -20,7 +20,7 @@ def train_model(model, train_data, device, epochs):
 
     for epoch in range(epochs):
         running_loss = 0.0
-        for i, (inputs, labels) in enumerate(train_loader, 0):
+        for batch_i, (inputs, labels) in enumerate(train_loader, 0):
             inputs, labels = inputs.to(device), labels.to(device)
 
             optimizer.zero_grad()
@@ -30,8 +30,8 @@ def train_model(model, train_data, device, epochs):
             optimizer.step()
 
             running_loss += loss.item()
-            if i % 64 == 63:  # Print loss every 64 batches
-                print(f'[{epoch + 1}, {i + 1}] loss: {running_loss / 64:.4f}')
+            if batch_i % 64 == 63:  # Print loss every 64 batches
+                print(f'[{epoch + 1}, {batch_i + 1}] loss: {running_loss / 64:.4f}')
                 running_loss = 0.0
 
     print("It finished training")
