@@ -17,4 +17,6 @@ __pycache__/
 Pipfile.lock
 
 
-data/
+Data/EMNIST
+Data/FashionMNIST
+Data/MNIST
