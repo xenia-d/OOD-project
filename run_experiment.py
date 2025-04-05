@@ -8,27 +8,15 @@ from Data.MNIST import MNIST
 from Data.EMNIST import EMNIST
 from Data.FashionMNIST import FashionMNIST
 from Model_Architecture.Baseline_CNN import BaselineCNN
+from Utils.utils import *
 
-def load_model():
+def load_model(model_name):
     model = BaselineCNN()
-    model.load_state_dict(torch.load("Saved_Models/baseline_cnn.pth"))
+    model.load_state_dict(torch.load("Saved_Models/"+model_name))
+    model.eval()
     return model
 
-def plot_roc_curve(id_uq, ood_uq, title):
-    labels = np.concatenate([np.zeros_like(id_uq), np.ones_like(ood_uq)])
-    preds = np.concatenate([id_uq, ood_uq])
-    fpr, tpr, thresholds = roc_curve(labels, preds)
-
-    auroc = roc_auc_score(labels, preds)
-    print("\t", title, "AUROC: ", round(auroc, 3))
-
-    plt.plot(fpr, tpr)
-    plt.title(title)
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.show()
-
-def get_entropys(model, data_loader):
+def get_baseline_entropys(model, data_loader):
     all_entropys = []
     model.eval()
     with torch.no_grad():
@@ -48,35 +36,73 @@ def get_entropys(model, data_loader):
                 #     plt.imshow(images[idx].squeeze())
                 #     plt.title("Low Entropy: " + str(labels[idx].item()))
                 #     plt.show()
+    print(str(len(all_entropys)), "Baseline Entropys Obtained")
+
+    return all_entropys
+
+def get_ensemble_entropys(models, data_loader):
+    all_entropys = []
+    with torch.no_grad():
+        for images, labels in data_loader:
+            all_outputs = []
+            for model in models:
+                outputs = model(images)
+                softmax_outputs = torch.exp(outputs) # Convert from log softmax to softmax
+                all_outputs.append(softmax_outputs)
+            # print("All Outputs: ", all_outputs)
+            mean_outputs = np.mean(all_outputs, axis=0)
+            # print("Mean Output: ", mean_outputs)
+            entropys = scipy.stats.entropy(mean_outputs, axis=1)
+            for idx, entropy in enumerate(entropys):
+                all_entropys.append(entropy)
+                # if entropy > 0.75:
+                #     plt.imshow(images[idx].squeeze())
+                #     plt.title("High Entropy: " + str(labels[idx].item()))
+                #     plt.show()
+                # if entropy < 0.05:
+                #     plt.imshow(images[idx].squeeze())
+                #     plt.title("Low Entropy: " + str(labels[idx].item()))
+                #     plt.show()
+            # break
+    print(str(len(all_entropys)), "Ensemble Entropys Obtained")
 
     return all_entropys
 
 def main():
-    model = load_model()
+    models = []
+    for num in range(1,6):
+        model = load_model("baseline_cnn_"+str(num)+".pth")
+        models.append(model)
 
     # Get MNIST Entropys
     mnist_data = MNIST(batch_size=64)
     mnist_test = mnist_data.get_test()
-    mnist_entropys = get_entropys(model, mnist_test)
-    print("~"+str(len(mnist_test)*64), "MMIST Entropys Obtained")
+    mnist_entropys_baseline = get_baseline_entropys(models[0], mnist_test)
+    mnist_entropys_ensemble = get_ensemble_entropys(models, mnist_test)
 
     # Get EMNIST Entropys
     emnist_data = EMNIST(batch_size=64)
     emnist_test = emnist_data.get_test()
-    emnist_entropys = get_entropys(model, emnist_test)
-    print("~"+str(len(emnist_test)*64), "EMMIST Entropys Obtained")
-    plot_roc_curve(mnist_entropys, emnist_entropys, "MNIST vs EMNIST")
+    emnist_entropys_baseline = get_baseline_entropys(models[0], emnist_test)
+    emnist_entropys_ensemble = get_ensemble_entropys(models, emnist_test)
+
+    plot_roc_curve(mnist_entropys_baseline, emnist_entropys_baseline, "Baseline -- MNIST vs EMNIST")
+    plot_roc_curve(mnist_entropys_ensemble, emnist_entropys_ensemble, "Ensemble -- MNIST vs EMNIST")
 
     # Get FashionMNIST Entropys
     fashion_mnist_data = FashionMNIST(batch_size=64)
     fashion_mnist_test = fashion_mnist_data.get_test()
-    fashion_mnist_entropys = get_entropys(model,fashion_mnist_test)
-    print("~"+str(len(fashion_mnist_test)*64), "Fashion MMIST Entropys Obtained")
-    plot_roc_curve(mnist_entropys, fashion_mnist_entropys, "MNIST vs Fashion MNIST")
+    fashion_mnist_entropys_baseline = get_baseline_entropys(models[0],fashion_mnist_test)
+    fashion_mnist_entropys_ensemble = get_ensemble_entropys(models, fashion_mnist_test)
 
-    all_dataset_entropys = [mnist_entropys, emnist_entropys, fashion_mnist_entropys]
-    plt.hist(all_dataset_entropys, bins=8)
-    plt.legend(["MNIST", "EMNIST", "Fashion MNIST"])
-    plt.show()
+    plot_roc_curve(mnist_entropys_baseline, fashion_mnist_entropys_baseline, "MNIST vs Fashion MNIST")
+    plot_roc_curve(mnist_entropys_ensemble, fashion_mnist_entropys_ensemble, "Ensemble -- MNIST vs Fashion MNIST")
+
+    # Plot Overall Histograms
+    all_dataset_entropys_baseline = [mnist_entropys_baseline, emnist_entropys_baseline, fashion_mnist_entropys_baseline]
+    plot_hist(all_dataset_entropys_baseline, "Baseline -- Histogram of Dataset Entropys")
+
+    all_dataset_entropys_ensemble = [mnist_entropys_ensemble, emnist_entropys_ensemble, fashion_mnist_entropys_ensemble]
+    plot_hist(all_dataset_entropys_ensemble, "Ensemble -- Histogram of Dataset Entropys")
 
 main()

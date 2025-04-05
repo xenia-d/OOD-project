@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
-from Model_Architecture.baseline_cnn import BaselineCNN
+from Model_Architecture.Baseline_CNN import BaselineCNN
 from sklearn.metrics import f1_score
 from Data.preprocess import inspect_class_distribution
 from pickle import dump
@@ -80,6 +80,6 @@ if __name__ == "__main__":
     inspect_class_distribution(test_data, "Test Data Distribution")
 
     train_model(model, train_data, device, epochs=5)
-    test_model(model, test_data, device)
+    # test_model(model, test_data, device)
 
-    torch.save(model.state_dict(), "Saved_Models/baseline_cnn.pth")
+    torch.save(model.state_dict(), "Saved_Models/baseline_cnn_5.pth")
