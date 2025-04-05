@@ -1,0 +1,65 @@
+import torch
+import numpy as np
+import scipy.stats
+import matplotlib.pyplot as plt
+
+from Data.MNIST import MNIST
+from Data.EMNIST import EMNIST
+from Data.FashionMNIST import FashionMNIST
+from Model_Architecture.Baseline_CNN import BaselineCNN
+
+def load_model():
+    model = BaselineCNN()
+    model.load_state_dict(torch.load("Saved_Models/baseline_cnn.pth"))
+    return model
+
+def get_entropys(model, data_loader):
+    all_entropys = []
+    model.eval()
+    with torch.no_grad():
+        for images, labels in data_loader:
+            outputs = model(images)
+            softmax_outputs = torch.exp(outputs) # Convert from log softmax to softmax
+            # print("Outputs: ", softmax_outputs)
+            entropys = scipy.stats.entropy(softmax_outputs, axis=1)
+            # print("Entropys:", entropys)
+            for idx, entropy in enumerate(entropys):
+                all_entropys.append(entropy)
+                # if entropy > 0.75:
+                #     plt.imshow(images[idx].squeeze())
+                #     plt.title("High Entropy: " + str(labels[idx].item()))
+                #     plt.show()
+                # if entropy < 0.05:
+                #     plt.imshow(images[idx].squeeze())
+                #     plt.title("Low Entropy: " + str(labels[idx].item()))
+                #     plt.show()
+
+    return all_entropys
+
+def main():
+    model = load_model()
+
+    # Get MNIST Entropys
+    mnist_data = MNIST(batch_size=64)
+    mnist_test = mnist_data.get_test()
+    mnist_entropys = get_entropys(model, mnist_test)
+    print("MMIST Entropys Obtained")
+
+    # Get EMNIST Entropys
+    emnist_data = EMNIST(batch_size=64)
+    emnist_test = emnist_data.get_test()
+    emnist_entropys = get_entropys(model, emnist_test)
+    print("EMMIST Entropys Obtained")
+
+    # Get FashionMNIST Entropys
+    fashion_mnist_data = FashionMNIST(batch_size=64)
+    fashion_mnist_test = fashion_mnist_data.get_test()
+    fashion_mnist_entropys = get_entropys(model,fashion_mnist_test)
+    print("Fashion MMIST Entropys Obtained")
+
+    all_dataset_entropys = [mnist_entropys, emnist_entropys, fashion_mnist_entropys]
+    plt.hist(all_dataset_entropys, bins=5)
+    plt.legend(["MNIST", "EMNIST", "Fashion MNIST"])
+    plt.show()
+
+main()
