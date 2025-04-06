@@ -7,8 +7,11 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from Data.MNIST import MNIST
 from Data.EMNIST import EMNIST
 from Data.FashionMNIST import FashionMNIST
+from Data.CIFAR10 import CIFAR10
+from Data.CIFAR100 import CIFAR100
+from Data.SVHN import SVHN
 from Model_Architecture.Baseline_CNN import BaselineCNN
-from Utils.utils import *
+from Utils.utils import plot_hist, plot_roc_curve, plot_density
 
 def load_model(model_name):
     model = BaselineCNN()
@@ -68,7 +71,7 @@ def get_ensemble_entropys(models, data_loader):
 
     return all_entropys
 
-def main():
+def basic_experiment():
     models = []
     for num in range(1,6):
         model = load_model("baseline_cnn_"+str(num)+".pth")
@@ -83,6 +86,7 @@ def main():
     # Get EMNIST Entropys
     emnist_data = EMNIST(batch_size=64)
     emnist_test = emnist_data.get_test()
+    # emnist_data.show_sample(emnist_test)
     emnist_entropys_baseline = get_baseline_entropys(models[0], emnist_test)
     emnist_entropys_ensemble = get_ensemble_entropys(models, emnist_test)
 
@@ -100,9 +104,19 @@ def main():
 
     # Plot Overall Histograms
     all_dataset_entropys_baseline = [mnist_entropys_baseline, emnist_entropys_baseline, fashion_mnist_entropys_baseline]
-    plot_hist(all_dataset_entropys_baseline, "Baseline -- Histogram of Dataset Entropys")
+    plot_hist(all_dataset_entropys_baseline, "Baseline -- Histogram of Dataset Entropys", bins=10)
+    # plot_density(all_dataset_entropys_baseline, "Baseline -- Density Plot of Dataset Entropys")
 
     all_dataset_entropys_ensemble = [mnist_entropys_ensemble, emnist_entropys_ensemble, fashion_mnist_entropys_ensemble]
-    plot_hist(all_dataset_entropys_ensemble, "Ensemble -- Histogram of Dataset Entropys")
+    plot_hist(all_dataset_entropys_ensemble, "Ensemble -- Histogram of Dataset Entropys", bins=10)
+    # plot_density(all_dataset_entropys_ensemble, "Ensemble -- Density Plot of Dataset Entropys")
 
-main()
+def adv_experiment():
+    # cifar10_data = CIFAR10(batch_size=64)
+    # cifar10_test = cifar10_data.get_test()
+
+    cifar100_data = CIFAR100(batch_size=64)
+    cifar100_test = cifar100_data.get_test()
+
+# basic_experiment()
+adv_experiment()

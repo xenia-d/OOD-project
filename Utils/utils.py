@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sn
 from sklearn.metrics import roc_auc_score, roc_curve
 
 
@@ -22,4 +23,10 @@ def plot_hist(data, title, legend=["MNIST", "EMNIST", "Fashion MNIST"], bins=10)
     plt.title(title)
     plt.legend(legend)
     plt.show()
+
+def plot_density(data, title, legend=["MNIST", "EMNIST", "Fashion MNIST"]):
+    ## TO DO
+    pass
+
+
 
