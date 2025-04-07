@@ -24,35 +24,50 @@ import torchvision.transforms as transforms
 import numpy as np
 import time
 from scipy import misc
-import calMetric as m
-import calData as d
-from baseline_cnn_logits import BaselineCNN
+from Data import FashionMNIST, EMNIST, SVHN, CIFAR10, MNIST, CIFAR100
+from Model_Architecture.Adv_CNN import ResNet18
+from . import calMetric as m
+from . import calData as d
+from .baseline_cnn_logits import BaselineCNN
 
 start = time.time()
 
 transform = transforms.Compose([transforms.ToTensor()])
 criterion = nn.CrossEntropyLoss()
 
-def test(nnName, dataName, CUDA_DEVICE, epsilon, temperature):
-    if nnName == "custom" : 
+def test(nnName, CUDA_DEVICE, epsilon, temperature):
+    if nnName == "BASELINE_CNN" : 
         net1 = BaselineCNN()
         model_name = 'baseline_cnn_1'
-        net1.load_state_dict(torch.load(f"../Saved_Models/{model_name}.pth"))
-    else:
-        net1 = torch.load("../models/{}.pth".format(nnName))
+    elif nnName == "ADVANCED_CNN" :
+        net1 = ResNet18()
+        model_name = 'adv_cnn_1'
+    net1.load_state_dict(torch.load(f"./Saved_Models/{model_name}.pth", map_location=CUDA_DEVICE))
 
     net1.to(CUDA_DEVICE)
 
-    if nnName == "custom" : 
-        testsetout = torchvision.datasets.FashionMNIST(root='../Data/', train=False, download=True, transform=transform)
-        testloaderOut = torch.utils.data.DataLoader(testsetout, batch_size=1,
-                                            shuffle=False)
-        testset = torchvision.datasets.MNIST(root='../Data/', train=False, download=True, transform=transform)
-        testloaderIn = torch.utils.data.DataLoader(testset, batch_size=1,
-                                            shuffle=False)
+    if nnName == "BASELINE_CNN" : 
+        testsetFarOutData = FashionMNIST(batch_size=1)
+        testloaderFarOut = testsetFarOutData.get_test()
+        
+        testsetNearOutData = EMNIST(batch_size=1)
+        testloaderNearOut = testsetNearOutData.get_test()
+        
+        testsetInData = MNIST(batch_size=1)
+        testloaderIn = testsetInData.get_test()
+        
+    if nnName == "ADVANCED_CNN" : 
+        testsetFarOutData = SVHN(batch_size=1)
+        testloaderFarOut = testsetFarOutData.get_test()
+        
+        testsetNearOutData = CIFAR100(batch_size=1)
+        testloaderNearOut = testsetNearOutData.get_test()
+        
+        testsetInData = CIFAR10(batch_size=1)
+        testloaderIn = testsetInData.get_test()
     
-    d.testData(net1, criterion, CUDA_DEVICE, testloaderIn, testloaderOut, nnName, dataName, epsilon, temperature) 
-    m.metric(nnName, dataName)
+    d.testData(net1, criterion, CUDA_DEVICE, testloaderIn, testloaderNearOut, testloaderFarOut, nnName, epsilon, temperature) 
+    m.new_metric()
 
 
 
