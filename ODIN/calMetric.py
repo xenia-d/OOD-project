@@ -21,10 +21,12 @@ import numpy as np
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import time
 from scipy import misc
+from sklearn.metrics import roc_auc_score, roc_curve
+import seaborn as sn
 
 
 def tpr95(name):
@@ -244,8 +246,6 @@ def auprOut(name):
     auprNew += recall * precision
     return auprBase, auprNew
 
-
-
 def detection(name):
     #calculate the minimum detection error
     # calculate baseline
@@ -290,11 +290,67 @@ def detection(name):
             
     return errorBase, errorNew
 
+def get_curve(title, model):
+    iid = np.loadtxt(f'./softmax_scores/confidence_Base_In.txt', delimiter=',')
+    ood = np.loadtxt(f'./softmax_scores/confidence_Base_Out.txt', delimiter=',')
+    id_uq = iid[:, 2]
+    ood_uq = ood[:, 2]
+    labels = np.concatenate([np.ones_like(id_uq), np.zeros_like(ood_uq)])
+    preds = np.concatenate([id_uq, ood_uq])
+    fpr, tpr, thresholds = roc_curve(labels, preds)
 
+    auroc = roc_auc_score(labels, preds)
+    print("\t", title, "AUROC: ", round(auroc, 3))
+
+    plt.plot(fpr, tpr)
+    full_title = title + " -- AUROC = " + str(round(auroc, 3))
+    plt.title(full_title)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    # plt.savefig("Saved Plots/ROC "+str(title))
+    plt.show()
+
+def plot_roc_curve(id_uq, ood_uq, title):
+    labels = np.concatenate([np.zeros_like(id_uq), np.ones_like(ood_uq)])
+    preds = np.concatenate([id_uq, ood_uq])
+    fpr, tpr, thresholds = roc_curve(labels, preds)
+
+    auroc = roc_auc_score(labels, preds)
+    print("\t", title, "AUROC: ", round(auroc, 3))
+
+    plt.plot(fpr, tpr)
+    full_title = title + " -- AUROC = " + str(round(auroc, 3))
+    plt.title(full_title)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    # plt.savefig("Saved Plots/ROC "+str(title))
+    plt.show()
+
+def plot_hist(data, title, legend=["MNIST", "Fashion MNIST"], bins=10):
+    plt.hist(data, bins=bins)
+    plt.title(title)
+    plt.legend(legend)
+    # plt.savefig("Saved Plots/Histogram "+str(title))
+    plt.show()
+
+def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "Fashion MNIST"]):
+    plt.figure(figsize=(8, 5))
+    for i, values in enumerate(data):
+        sn.kdeplot(values, label=legend[i], fill=True, alpha=0.5)
+
+    plt.title(title)
+    plt.xlabel("Value")
+    plt.ylabel("Density")
+    plt.legend()
+    # plt.savefig("Saved Plots/Density "+str(title))
+    plt.show()
 
 
 def metric(nn, data):
     print("Calculating metrics...")
+    get_curve("BASELINE", 'Base')
+    get_curve("ODIN", 'Our')
+
     if nn == "densenet10" or nn == "wideresnet10": indis = "CIFAR-10"
     if nn == "densenet100" or nn == "wideresnet100": indis = "CIFAR-100"
     if nn == "densenet10" or nn == "densenet100": nnStructure = "DenseNet-BC-100"
@@ -326,8 +382,47 @@ def metric(nn, data):
     print("{:20}{:13.1f}%{:>18.1f}%".format("AUPR In:",auprinBase*100, auprinNew*100))
     print("{:20}{:13.1f}%{:>18.1f}%".format("AUPR Out:",auproutBase*100, auproutNew*100))
 
+def new_metric(nn):
+
+    # [in, near, far]
+    if nn == "ADVANCED_CNN":
+        name_list = ["CIFAR10", "CIFAR100", "SVH"]
+    elif nn == "BASELINE_CNN":
+        name_list = ["MNIST", "EMNIST", "FashionMNIST"]
+    ## BASELINE ##
+    experiment_name = "BASELINE"
+    iid = np.loadtxt(f'./softmax_scores/confidence_Base_In.txt', delimiter=',')
+    near_ood = np.loadtxt(f'./softmax_scores/confidence_Base_Near_Out.txt', delimiter=',')
+    far_ood = np.loadtxt(f'./softmax_scores/confidence_Base_Far_Out.txt', delimiter=',')
+    id_uq = iid[:, 2]
+    near_ood_uq = near_ood[:, 2]
+    far_ood_uq = far_ood[:, 2]
+
+    plot_roc_curve(near_ood_uq, id_uq, experiment_name+" -- Near OOD")
+    plot_roc_curve(far_ood_uq, id_uq, experiment_name+" -- Far OOD")
+    plot_hist([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Histogram of Dataset Entropys", legend = name_list, bins=10)
+    plot_density([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Density Plot of Dataset Entropys", legend=name_list)
+
+    ## ODIN ##
+    experiment_name = "ODIN"
+
+    iid = np.loadtxt(f'./softmax_scores/confidence_ODIN_In.txt', delimiter=',')
+    near_ood = np.loadtxt(f'./softmax_scores/confidence_ODIN_Near_Out.txt', delimiter=',')
+    far_ood = np.loadtxt(f'./softmax_scores/confidence_ODIN_Far_Out.txt', delimiter=',')
+    id_uq = iid[:, 2]
+    near_ood_uq = near_ood[:, 2]
+    far_ood_uq = far_ood[:, 2]
+
+    
+    plot_roc_curve(near_ood_uq, id_uq, experiment_name+" -- Near OOD")
+    plot_roc_curve(far_ood_uq, id_uq, experiment_name+" -- Far OOD")
+    plot_hist([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Histogram of Dataset Entropys", legend=name_list, bins=10)
+    plot_density([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Density Plot of Dataset Entropys", legend=name_list)
 
 
+
+if __name__ == "__main__":
+    new_metric()
 
 
 
