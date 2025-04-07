@@ -1,14 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.transforms as transforms
-from torchvision import datasets
-from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score
 import time
 
 from Model_Architecture.Adv_CNN import ResNet18
-from Data.preprocess import inspect_class_distribution
 from Data.CIFAR10 import CIFAR10
 
 
@@ -92,4 +88,4 @@ if __name__ == "__main__":
     train_model(model, cifar_10_train, cifar_10_val, device, epochs=10)
     # test_model(model, cifar_10_test, device)
 
-    torch.save(model.state_dict(), "Saved_Models/adv_cnn_3.pth")
+    torch.save(model.state_dict(), "Saved_Models/adv_cnn_5.pth")

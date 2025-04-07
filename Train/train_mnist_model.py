@@ -8,7 +8,6 @@ import torch.nn.functional as F
 from Model_Architecture.Baseline_CNN import BaselineCNN
 from sklearn.metrics import f1_score
 from Data.preprocess import inspect_class_distribution
-from pickle import dump
 
 
 def train_model(model, train_data, device, epochs):

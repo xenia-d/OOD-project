@@ -39,5 +39,10 @@ def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "EMN
     plt.savefig("Saved Plots/Density "+str(title))
     plt.show()
 
+def show_max_entropy_examples(image, label):
+    plt.imshow(image.squeeze())
+    plt.title("High Entropy: " + str(label.item()))
+    plt.show()
+
 
 
