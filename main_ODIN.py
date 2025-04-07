@@ -46,16 +46,12 @@ parser.set_defaults(argument=True)
 
 
 ### TO DO:
-# check the metrics code
-# write some code to try different temperature and perturbation values?
+# check the metrics code -- see if it can be used from utils instead of duplicating it there
+# write some code to try different temperature and perturbation values -- should probs be done
 
 # Setting the name of neural networks (nnName)
 # Custom CNN trained on MNIST: BASELINE_CNN
 # Custom CNN trained on CIFAR10: ADVANCED_CNN
-
-# Setting the name of the out-of-distribution dataset (out_dataset)
-# FashionMNIST: FashionMNIST
-# EMNIST: EMNIST
 
 # Setting the perturbation magnitude
 # magnitude = 0.0014
