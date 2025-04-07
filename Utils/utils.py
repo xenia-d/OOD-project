@@ -13,15 +13,18 @@ def plot_roc_curve(id_uq, ood_uq, title):
     print("\t", title, "AUROC: ", round(auroc, 3))
 
     plt.plot(fpr, tpr)
-    plt.title(title)
+    full_title = title + " -- AUROC = " + str(round(auroc, 3))
+    plt.title(full_title)
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
+    plt.savefig("Saved Plots/ROC "+str(title))
     plt.show()
 
 def plot_hist(data, title, legend=["MNIST", "EMNIST", "Fashion MNIST"], bins=10):
     plt.hist(data, bins=bins)
     plt.title(title)
     plt.legend(legend)
+    plt.savefig("Saved Plots/Histogram "+str(title))
     plt.show()
 
 def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "EMNIST", "Fashion MNIST"]):
@@ -33,6 +36,7 @@ def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "EMN
     plt.xlabel("Value")
     plt.ylabel("Density")
     plt.legend()
+    plt.savefig("Saved Plots/Density "+str(title))
     plt.show()
 
 

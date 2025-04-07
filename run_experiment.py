@@ -123,7 +123,7 @@ def basic_experiment():
 def adv_experiment():
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # For mac
     models = []
-    for num in range(1,2):
+    for num in range(1,4):
         model = load_model("adv_cnn_"+str(num)+".pth", device, dataset="CIFAR10")
         models.append(model)
 
@@ -131,25 +131,35 @@ def adv_experiment():
     cifar10_data = CIFAR10(batch_size=64)
     cifar10_test = cifar10_data.get_test()
     cifar10_entropy_baseline = get_baseline_entropys(models[0], cifar10_test, device)
+    # cifar10_entropy_ensemble = get_ensemble_entropys(models, cifar10_test, device)
 
     # Get CIFAR100 Entropys (Near OOD)
     cifar100_data = CIFAR100(batch_size=64)
     cifar100_test = cifar100_data.get_test()
     cifar100_entropy_baseline = get_baseline_entropys(models[0], cifar100_test, device)
+    # cifar100_entropy_ensemble = get_ensemble_entropys(models, cifar100_test, device)
 
     plot_roc_curve(cifar10_entropy_baseline, cifar100_entropy_baseline, "Baseline -- CIFAR10 (ID) vs CIFAR100 (Near OOD)")
+    # plot_roc_curve(cifar10_entropy_ensemble, cifar100_entropy_ensemble, "Ensemble -- CIFAR10 (ID) vs CIFAR100 (Near OOD)")
 
     # Get SVHN Entropys (Far OOD)
     svhn_data = SVHN(batch_size=64)
     svhn_test = svhn_data.get_test()
     svhn_entropys_baseline = get_baseline_entropys(models[0], svhn_test, device)
+    # svhn_entropy_ensemble = get_ensemble_entropys(models, svhn_test, device)
 
-    plot_roc_curve(cifar10_entropy_baseline, svhn_entropys_baseline, "Baseline -- CIFAR10 (ID) vs CIFAR100 (Far OOD)")
+    plot_roc_curve(cifar10_entropy_baseline, svhn_entropys_baseline, "Baseline -- CIFAR10 (ID) vs SVHN (Far OOD)")
+    # plot_roc_curve(cifar10_entropy_ensemble, svhn_entropy_ensemble, "Ensemble -- CIFAR10 (ID) vs SVHN (Far OOD)")
 
     # Plot overall metrics
     all_dataset_entropys_baseline = [cifar10_entropy_baseline, cifar100_entropy_baseline, svhn_entropys_baseline]
+    # all_dataset_entropys_ensemble = [cifar10_entropy_ensemble, cifar100_entropy_ensemble, svhn_entropy_ensemble]
+
     plot_hist(all_dataset_entropys_baseline, "Baseline -- Histogram of Dataset Entropys", bins=10, legend=["CIFAR10", "CIFAR100", "SVHN"])
     plot_density(all_dataset_entropys_baseline, "Baseline -- Density Plot of Dataset Entropys", legend=["CIFAR10", "CIFAR100", "SVHN"])
+
+    # plot_hist(all_dataset_entropys_ensemble, "Ensemble -- Histogram of Dataset Entropys", bins=10, legend=["CIFAR10", "CIFAR100", "SVHN"])
+    # plot_density(all_dataset_entropys_ensemble, "Ensemble -- Density Plot of Dataset Entropys", legend=["CIFAR10", "CIFAR100", "SVHN"])
 
 # basic_experiment()
 adv_experiment()

@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.utils.data
 
 
 # inspiration from https://github.com/pytorch/examples/blob/main/mnist/main.py 
