@@ -34,7 +34,7 @@ import cal as c
 
 parser = argparse.ArgumentParser(description='Pytorch Detecting Out-of-distribution examples in neural networks')
 
-parser.add_argument('--nn', default="custom", type=str,
+parser.add_argument('--nn', default="BASELINE_CNN", type=str,
                     help='neural network name and training set')
 parser.add_argument('--out_dataset', default="FashionMNIST", type=str,
                     help='out-of-distribution dataset')
@@ -46,11 +46,19 @@ parser.add_argument('--device', default = 'cpu', type = str,
 		    help='cpu device')
 parser.set_defaults(argument=True)
 
+
+### TO DO:
+#  add support for advanced model 
+# add support for near and far OOD datasets
+# check the metrics code
+
 # Setting the name of neural networks (nnName)
-# Custom CNN trained on MNIST: custom
+# Custom CNN trained on MNIST: BASELINE_CNN
+# Custom CNN trained on CIFAR10: ADVANCED_CNN
 
 # Setting the name of the out-of-distribution dataset (out_dataset)
 # FashionMNIST: FashionMNIST
+# EMNIST: EMNIST
 
 # Setting the perturbation magnitude
 # magnitude = 0.0014
