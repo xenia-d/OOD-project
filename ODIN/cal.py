@@ -67,7 +67,7 @@ def test(nnName, CUDA_DEVICE, epsilon, temperature):
         testloaderIn = testsetInData.get_test()
     
     d.testData(net1, criterion, CUDA_DEVICE, testloaderIn, testloaderNearOut, testloaderFarOut, nnName, epsilon, temperature) 
-    m.new_metric()
+    m.new_metric(nnName)
 
 
 
