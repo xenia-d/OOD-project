@@ -294,6 +294,7 @@ def detection(name):
 
 
 def metric(nn, data):
+    print("Calculating metrics...")
     if nn == "densenet10" or nn == "wideresnet10": indis = "CIFAR-10"
     if nn == "densenet100" or nn == "wideresnet100": indis = "CIFAR-100"
     if nn == "densenet10" or nn == "densenet100": nnStructure = "DenseNet-BC-100"
