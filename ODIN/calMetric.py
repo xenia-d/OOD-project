@@ -43,14 +43,14 @@ def plot_roc_curve(id_uq, ood_uq, title):
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.savefig("Saved Plots/ODIN/ROC "+str(title)+".png")
-    plt.show()
+    # plt.show()
 
 def plot_hist(data, title, legend=["MNIST", "Fashion MNIST"], bins=10):
     plt.hist(data, bins=bins)
     plt.title(title)
     plt.legend(legend)
     plt.savefig("Saved Plots/ODIN/Histogram "+str(title)+".png")
-    plt.show()
+    # plt.show()
 
 def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "Fashion MNIST"]):
     plt.figure(figsize=(8, 5))
@@ -62,7 +62,7 @@ def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "Fas
     plt.ylabel("Density")
     plt.legend()
     plt.savefig("Saved Plots/ODIN/Density "+str(title)+".png")
-    plt.show()
+    # plt.show()
 
 def new_metric(nn):
     # [in, near, far]
@@ -73,7 +73,6 @@ def new_metric(nn):
         folder_name = 'baseline_cnn'
         name_list = ["MNIST", "EMNIST", "FashionMNIST"]
     ## BASELINE ##
-    print("BASELINE")
     experiment_name = nn + " BASE"
     iid = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_Base_In.txt', delimiter=',')
     near_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_Base_Near_Out.txt', delimiter=',')
@@ -88,7 +87,6 @@ def new_metric(nn):
     plot_density([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Density Plot of Dataset Confidences", legend=name_list)
 
     ## ODIN ##
-    print("ODIN")
     experiment_name = nn + " ODIN"
 
     iid = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_ODIN_In.txt', delimiter=',')
