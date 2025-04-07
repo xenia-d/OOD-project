@@ -24,7 +24,6 @@ import torchvision.transforms as transforms
 import numpy as np
 import time
 from scipy import misc
-
 import numpy as np
 
 def get_softmax_outputs(logits):
