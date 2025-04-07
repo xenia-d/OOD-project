@@ -46,8 +46,6 @@ parser.set_defaults(argument=True)
 
 
 ### TO DO:
-#  add support for advanced model 
-# add support for near and far OOD datasets
 # check the metrics code
 # write some code to try different temperature and perturbation values?
 
