@@ -86,13 +86,18 @@ def get_score(net1, criterion, CUDA_DEVICE, dataloader, noiseMagnitude1, temper,
         if j == N - 1: break
 
 def testData(net1, criterion, CUDA_DEVICE, testloader_ID, testloader_near_OOD, testloader_far_OOD, nnName, noiseMagnitude1, temper):
-    confidences_baseline_ID = open("ODIN/softmax_scores/confidence_Base_In.txt", 'w')
-    confidences_baseline_Near_OOD = open("ODIN/softmax_scores/confidence_Base_Near_Out.txt", 'w')
-    confidences_baseline_Far_OOD = open("ODIN/softmax_scores/confidence_Base_Far_Out.txt", 'w')
+    if nnName == "BASELINE_CNN":
+        folder_name = 'baseline_cnn'
+    elif nnName == "ADVANCED_CNN":
+        folder_name = 'adv_cnn'
     
-    confidences_ODIN_ID = open("ODIN/softmax_scores/confidence_ODIN_In.txt", 'w')
-    confidences_ODIN_Near_OOD = open("ODIN/softmax_scores/confidence_ODIN_Near_Out.txt", 'w')
-    confidences_ODIN_Far_OOD = open("ODIN/softmax_scores/confidence_ODIN_Far_Out.txt", 'w')
+    confidences_baseline_ID = open(f"ODIN/softmax_scores/{folder_name}/confidence_Base_In.txt", 'w')
+    confidences_baseline_Near_OOD = open(f"ODIN/softmax_scores/{folder_name}/confidence_Base_Near_Out.txt", 'w')
+    confidences_baseline_Far_OOD = open(f"ODIN/softmax_scores/{folder_name}/confidence_Base_Far_Out.txt", 'w')
+    
+    confidences_ODIN_ID = open(f"ODIN/softmax_scores/{folder_name}/confidence_ODIN_In.txt", 'w')
+    confidences_ODIN_Near_OOD = open(f"ODIN/softmax_scores/{folder_name}/confidence_ODIN_Near_Out.txt", 'w')
+    confidences_ODIN_Far_OOD = open(f"ODIN/softmax_scores/{folder_name}/confidence_ODIN_Far_Out.txt", 'w')
     
     print("Processing in-distribution images")
     get_score(net1, criterion, CUDA_DEVICE, testloader_ID, noiseMagnitude1, temper, confidences_baseline_ID, confidences_ODIN_ID)
