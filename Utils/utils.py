@@ -24,9 +24,16 @@ def plot_hist(data, title, legend=["MNIST", "EMNIST", "Fashion MNIST"], bins=10)
     plt.legend(legend)
     plt.show()
 
-def plot_density(data, title, legend=["MNIST", "EMNIST", "Fashion MNIST"]):
-    ## TO DO
-    pass
+def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "EMNIST", "Fashion MNIST"]):
+    plt.figure(figsize=(8, 5))
+    for i, values in enumerate(data):
+        sn.kdeplot(values, label=legend[i], fill=True, alpha=0.5)
+
+    plt.title(title)
+    plt.xlabel("Value")
+    plt.ylabel("Density")
+    plt.legend()
+    plt.show()
 
 
 

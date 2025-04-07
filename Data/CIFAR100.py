@@ -1,11 +1,16 @@
 import torchvision.transforms as transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader, Subset
+import matplotlib.pyplot as plt
+import numpy as np
 
 class CIFAR100:
     def __init__(self, batch_size):
         self.batch_size = batch_size
-        self.transform = transforms.Compose([transforms.ToTensor()])
+        self.transform = transforms.Compose(
+            [transforms.ToTensor(),
+             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))]
+            )
 
     def get_train(self):
         train_data = datasets.CIFAR100(root='Data', train=True, download=True, transform=self.transform)
@@ -32,3 +37,11 @@ class CIFAR100:
         filtered_data = Subset(data, filtered_indicies)
 
         return filtered_data
+    
+    def show_sample(self, data):
+        images, labels = next(iter(data))
+        for image, label in zip(images, labels):
+            image = np.transpose(image, (1,2,0))
+            plt.imshow(image)
+            plt.title(str(label.item()))
+            plt.show()
