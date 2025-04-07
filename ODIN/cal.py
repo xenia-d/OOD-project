@@ -26,14 +26,10 @@ import time
 from scipy import misc
 import calMetric as m
 import calData as d
-from baseline_cnn import BaselineCNN
+from baseline_cnn_logits import BaselineCNN
 
 start = time.time()
 
-# transform = transforms.Compose([
-#     transforms.ToTensor(),
-#     transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0)),
-# ])
 transform = transforms.Compose([transforms.ToTensor()])
 criterion = nn.CrossEntropyLoss()
 

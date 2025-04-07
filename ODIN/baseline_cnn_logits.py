@@ -36,9 +36,8 @@ class BaselineCNN(nn.Module):
         x = self.dropout(x)
 
         x = self.fc2(x)
-        output = F.log_softmax(x, dim=1)
 
-        return output
+        return x
 
     
 
