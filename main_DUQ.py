@@ -8,7 +8,7 @@ from ignite.metrics import Accuracy, Loss
 from ignite.handlers import ProgressBar
 from DUQ.DUQ import CNN_DUQ  
 from Data import FashionMNIST, EMNIST, MNIST  
-from DUQ.OOD import get_fashionmnist_mnist_ood, get_emnist_mnist_ood
+from DUQ.OOD import get_mnist_fashionmnist_ood, get_mnist_emnist_ood
 
 
 def train_model(l_gradient_penalty, length_scale, final_model):
