@@ -36,17 +36,22 @@ parser = argparse.ArgumentParser(description='Pytorch Detecting Out-of-distribut
 
 parser.add_argument('--nn', default="BASELINE_CNN", type=str,
                     help='neural network name and training set')
+parser.add_argument('--model_num', default="all", type=str,
+                    help='which model to test')
 parser.add_argument('--magnitude', default=0.0014, type=float,
                     help='perturbation magnitude')
 parser.add_argument('--temperature', default=1000, type=int,
                     help='temperature scaling')
 parser.add_argument('--device', default = 'cpu', type = str,
 		    help='cpu device')
+parser.add_argument('--get_metrics_only', action=argparse.BooleanOptionalAction,
+		    help='only include if all the desired softmax scores have already been calculated')
 parser.set_defaults(argument=True)
 
 
 ### TO DO:
 # check the metrics code -- see if it can be used from utils instead of duplicating it there
+# add support for other trained models (1-5)
 # write some code to try different temperature and perturbation values -- should probs be done
 
 # Setting the name of neural networks (nnName)
@@ -62,7 +67,7 @@ parser.set_defaults(argument=True)
 def main():
     global args
     args = parser.parse_args()
-    c.test(args.nn, args.device, args.magnitude, args.temperature)
+    c.test(args.nn, args.device, args.get_metrics_only, args.model_num, args.magnitude, args.temperature)
 
 if __name__ == '__main__':
     main()

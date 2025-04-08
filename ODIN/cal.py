@@ -35,16 +35,13 @@ start = time.time()
 transform = transforms.Compose([transforms.ToTensor()])
 criterion = nn.CrossEntropyLoss()
 
-def test(nnName, CUDA_DEVICE, epsilon, temperature):
+def test(nnName, CUDA_DEVICE, metrics_only, model_num, epsilon, temperature):
     if nnName == "BASELINE_CNN" : 
         net1 = BaselineCNN()
-        model_name = 'baseline_cnn_1'
+        model_name = 'baseline_cnn_'
     elif nnName == "ADVANCED_CNN" :
         net1 = ResNet18()
-        model_name = 'adv_cnn_1'
-    net1.load_state_dict(torch.load(f"./Saved_Models/{model_name}.pth", map_location=CUDA_DEVICE))
-
-    net1.to(CUDA_DEVICE)
+        model_name = 'adv_cnn_'
 
     if nnName == "BASELINE_CNN" : 
         testsetFarOutData = FashionMNIST(batch_size=1)
@@ -66,8 +63,25 @@ def test(nnName, CUDA_DEVICE, epsilon, temperature):
         testsetInData = CIFAR10(batch_size=1)
         testloaderIn = testsetInData.get_test()
     
-    d.testData(net1, criterion, CUDA_DEVICE, testloaderIn, testloaderNearOut, testloaderFarOut, nnName, epsilon, temperature) 
-    m.new_metric(nnName)
+    if model_num == "all":
+        model_list = [1,2,3,4,5]
+    else:
+        model_list = [model_num]
+    
+    for n in model_list:
+        print("Processing model number: ", n)
+        model_name = model_name + n
+
+        net1.load_state_dict(torch.load(f"./Saved_Models/{model_name}.pth", map_location=CUDA_DEVICE))
+        net1.to(CUDA_DEVICE)
+
+        if not metrics_only:
+            print("Calculating softmax scores")
+            d.testData(net1, criterion, CUDA_DEVICE, testloaderIn, testloaderNearOut, testloaderFarOut, nnName, n, epsilon, temperature) 
+        m.new_metric(nnName, n)
+
+        # delete net1
+        del net1
 
 
 

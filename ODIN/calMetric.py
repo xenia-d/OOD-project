@@ -64,7 +64,19 @@ def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "Fas
     plt.savefig("Saved Plots/ODIN/Density "+str(title)+".png")
     # plt.show()
 
-def new_metric(nn):
+def log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq):
+    labels = np.concatenate([np.zeros_like(id_uq), np.ones_like(near_ood_uq)])
+    preds = np.concatenate([id_uq, near_ood_uq])
+    auroc = roc_auc_score(labels, preds)
+    log_file.write(f"{experiment_name} -- Near OOD AUROC: {round(auroc, 3)}\n")
+
+    labels = np.concatenate([np.zeros_like(id_uq), np.ones_like(far_ood_uq)])
+    preds = np.concatenate([id_uq, far_ood_uq])
+    auroc = roc_auc_score(labels, preds)
+    log_file.write(f"{experiment_name} -- Far OOD AUROC: {round(auroc, 3)}\n")
+    log_file.write("\n")
+
+def new_metric(nn, num):
     # [in, near, far]
     if nn == "ADVANCED_CNN":
         folder_name = 'adv_cnn'
@@ -72,31 +84,36 @@ def new_metric(nn):
     elif nn == "BASELINE_CNN":
         folder_name = 'baseline_cnn'
         name_list = ["MNIST", "EMNIST", "FashionMNIST"]
+
+    # open a file to log results
+    log_file = open(f"ODIN/results/{folder_name}/{num}_Log.txt", "w")
+
     ## BASELINE ##
-    experiment_name = nn + " BASE"
-    iid = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_Base_In.txt', delimiter=',')
-    near_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_Base_Near_Out.txt', delimiter=',')
-    far_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_Base_Far_Out.txt', delimiter=',')
+    experiment_name = nn + f"_{num}_ BASE"
+    iid = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_Base_In.txt', delimiter=',')
+    near_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_Base_Near_Out.txt', delimiter=',')
+    far_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_Base_Far_Out.txt', delimiter=',')
     id_uq = iid[:, 2]
     near_ood_uq = near_ood[:, 2]
     far_ood_uq = far_ood[:, 2]
 
+    log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq)
     plot_roc_curve(near_ood_uq, id_uq, experiment_name+" -- Near OOD")
     plot_roc_curve(far_ood_uq, id_uq, experiment_name+" -- Far OOD")
     plot_hist([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Histogram of Dataset Confidences", legend = name_list, bins=10)
     plot_density([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Density Plot of Dataset Confidences", legend=name_list)
 
     ## ODIN ##
-    experiment_name = nn + " ODIN"
+    experiment_name = nn + f"_{num}_ ODIN"
 
-    iid = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_ODIN_In.txt', delimiter=',')
-    near_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_ODIN_Near_Out.txt', delimiter=',')
-    far_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/confidence_ODIN_Far_Out.txt', delimiter=',')
+    iid = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_ODIN_In.txt', delimiter=',')
+    near_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_ODIN_Near_Out.txt', delimiter=',')
+    far_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_ODIN_Far_Out.txt', delimiter=',')
     id_uq = iid[:, 2]
     near_ood_uq = near_ood[:, 2]
     far_ood_uq = far_ood[:, 2]
-
     
+    log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq)
     plot_roc_curve(near_ood_uq, id_uq, experiment_name+" -- Near OOD")
     plot_roc_curve(far_ood_uq, id_uq, experiment_name+" -- Far OOD")
     plot_hist([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Histogram of Dataset Entropys", legend=name_list, bins=10)
