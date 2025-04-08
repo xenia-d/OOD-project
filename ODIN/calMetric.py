@@ -65,13 +65,13 @@ def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "Fas
     plt.close()
 
 def log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq):
-    labels = np.concatenate([np.zeros_like(id_uq), np.ones_like(near_ood_uq)])
-    preds = np.concatenate([id_uq, near_ood_uq])
+    labels = np.concatenate([np.zeros_like(near_ood_uq), np.ones_like(id_uq)])
+    preds = np.concatenate([near_ood_uq, id_uq])
     auroc = roc_auc_score(labels, preds)
     log_file.write(f"{experiment_name} -- Near OOD AUROC: {round(auroc, 3)}\n")
 
-    labels = np.concatenate([np.zeros_like(id_uq), np.ones_like(far_ood_uq)])
-    preds = np.concatenate([id_uq, far_ood_uq])
+    labels = np.concatenate([np.zeros_like(far_ood_uq), np.ones_like(id_uq)])
+    preds = np.concatenate([far_ood_uq, id_uq])
     auroc = roc_auc_score(labels, preds)
     log_file.write(f"{experiment_name} -- Far OOD AUROC: {round(auroc, 3)}\n")
     log_file.write("\n")
