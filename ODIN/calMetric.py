@@ -43,14 +43,14 @@ def plot_roc_curve(id_uq, ood_uq, title):
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.savefig("Saved Plots/ODIN/ROC "+str(title)+".png")
-    # plt.show()
+    plt.close()
 
 def plot_hist(data, title, legend=["MNIST", "Fashion MNIST"], bins=10):
     plt.hist(data, bins=bins)
     plt.title(title)
     plt.legend(legend)
     plt.savefig("Saved Plots/ODIN/Histogram "+str(title)+".png")
-    # plt.show()
+    plt.close()
 
 def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "Fashion MNIST"]):
     plt.figure(figsize=(8, 5))
@@ -62,7 +62,7 @@ def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "Fas
     plt.ylabel("Density")
     plt.legend()
     plt.savefig("Saved Plots/ODIN/Density "+str(title)+".png")
-    # plt.show()
+    plt.close()
 
 def log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq):
     labels = np.concatenate([np.zeros_like(id_uq), np.ones_like(near_ood_uq)])
