@@ -24,14 +24,15 @@ def plot_roc_curve(id_uq, ood_uq, title, method, dist):
     plt.savefig("Saved Plots/"+str(method)+"/"+str(dist)+"/ROC "+str(title))
     plt.show()
 
-def plot_hist(data, title, legend=["MNIST", "EMNIST", "Fashion MNIST"], bins=10):
+def plot_hist(data, title, method, dist, legend=["MNIST", "EMNIST", "Fashion MNIST"], bins=10):
     plt.hist(data, bins=bins)
     plt.title(title)
     plt.legend(legend)
-    plt.savefig("Saved Plots/Histogram "+str(title))
+    os.makedirs("Saved Plots/"+str(method)+"/"+str(dist), exist_ok=True)
+    plt.savefig("Saved Plots/"+str(method)+"/"+str(dist)+"/Histogram "+str(title))
     plt.show()
 
-def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "EMNIST", "Fashion MNIST"]):
+def plot_density(data, method, dist, title = "Density Plot of Entropys", legend=["MNIST", "EMNIST", "Fashion MNIST"]):
     plt.figure(figsize=(8, 5))
     for i, values in enumerate(data):
         sn.kdeplot(values, label=legend[i], fill=True, alpha=0.5)
@@ -40,7 +41,8 @@ def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "EMN
     plt.xlabel("Value")
     plt.ylabel("Density")
     plt.legend()
-    plt.savefig("Saved Plots/Density "+str(title))
+    os.makedirs("Saved Plots/"+str(method)+"/"+str(dist), exist_ok=True)
+    plt.savefig("Saved Plots/"+str(method)+"/"+str(dist)+"/Density "+str(title))
     plt.show()
 
 def show_max_entropy_examples(image, label):
