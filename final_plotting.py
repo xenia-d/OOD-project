@@ -19,10 +19,7 @@ def load_roc(dataset, method, ood_type):
     """Load ROC curve data from a saved .npz file"""
     folder_path = f"Saved Rocks/{method}/{dataset}/"
     other_dataset_name = get_dataset_name(dataset, ood_type)
-    file_name = f"{method} -- {dataset} (ID) vs {other_dataset_name} ({ood_type})"
-    if method == "Conf" or method == "ODIN":
-        file_name = file_name + " " + str(1)
-    file_name+= ".npz"
+    file_name = f"{method} -- {dataset} (ID) vs {other_dataset_name} ({ood_type}) {str(1)}.npz"
     data = np.load(os.path.join(folder_path, file_name))
     return data['fpr'], data['tpr']
 
@@ -49,6 +46,13 @@ def plot_all_rocs():
 
         plt.figure(figsize=(10, 8))
         for i, (fpr, tpr, dataset, method, ood_type) in enumerate(rocs):
+
+            # Clean up method names for plotting
+            if method == "Baseline":
+                method = "Entropy"
+            if method == "Conf":
+                method = "Confidence"
+
             if ood_type == "Near OOD":
                 plt.plot(fpr, tpr, colors[int(i/2)] + '-', label=f"{method} -- ({ood_type})")
             else:

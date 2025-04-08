@@ -45,3 +45,6 @@ class CIFAR100:
             plt.imshow(image)
             plt.title(str(label.item()))
             plt.show()
+
+    def get_name(self):
+        return "CIFAR100"

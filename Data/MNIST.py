@@ -18,3 +18,6 @@ class MNIST:
         test_loader = DataLoader(test_data, batch_size=self.batch_size, shuffle=False)
 
         return test_loader
+    
+    def get_name(self):
+        return "MNIST"

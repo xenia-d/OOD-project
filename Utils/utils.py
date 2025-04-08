@@ -25,6 +25,8 @@ def plot_roc_curve(id_uq, ood_uq, title, method, dist):
     # plt.show()
     plt.close()
 
+    return auroc
+
 def plot_hist(data, title, method, dist, legend=["MNIST", "EMNIST", "Fashion MNIST"], bins=10):
     plt.hist(data, bins=bins)
     plt.title(title)

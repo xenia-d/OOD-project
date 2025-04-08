@@ -45,3 +45,6 @@ class EMNIST:
             plt.imshow(image[0])
             plt.title(str(label.item()))
             plt.show()
+
+    def get_name(self):
+        return "EMNIST"
