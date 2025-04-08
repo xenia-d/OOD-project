@@ -51,9 +51,6 @@ def get_auroc_ood(true_dataset, ood_dataset, model):
 
     scores, accuracies = loop_over_dataloader(model, dataloader)
 
-    if len(anomaly_targets) != len(scores):
-        raise ValueError(f"Length mismatch: anomaly_targets ({len(anomaly_targets)}) vs. scores ({len(scores)})")
-
     accuracy = np.mean(accuracies[: len(true_dataset)])  
     roc_auc = roc_auc_score(anomaly_targets, scores)  
 
@@ -92,3 +89,9 @@ def get_mnist_emnist_ood(model):
     # print("EMNIST Test Size:", len(emnist_test.dataset))
 
     return get_auroc_ood(mnist_test, emnist_test, model)
+
+def get_anomaly_targets_and_scores(model, id_dataset, ood_dataset):
+    id_scores, _ = loop_over_dataloader(model, id_dataset)
+    ood_scores, _ = loop_over_dataloader(model, ood_dataset)
+
+    return id_scores, ood_scores

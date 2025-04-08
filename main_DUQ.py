@@ -8,8 +8,9 @@ from ignite.metrics import Accuracy, Loss
 from ignite.handlers import ProgressBar
 from DUQ.DUQ import CNN_DUQ  
 from Data import FashionMNIST, EMNIST, MNIST  
-from DUQ.OOD import get_mnist_fashionmnist_ood, get_mnist_emnist_ood
+from DUQ.OOD import get_mnist_fashionmnist_ood, get_mnist_emnist_ood, get_anomaly_targets_and_scores
 from Utils.utils import plot_roc_curve
+from matplotlib import pyplot as plt
 
 
 def train_model(l_gradient_penalty, length_scale, final_model):
@@ -48,7 +49,7 @@ def train_model(l_gradient_penalty, length_scale, final_model):
 
     def output_transform_acc(output):
         y_pred, y = output
-        return y_pred, torch.argmax(y, dim=1)
+        return y_pred, y #torch.argmax(y, dim=1)
 
     def step(engine, batch):
         model.train()
@@ -104,10 +105,11 @@ def train_model(l_gradient_penalty, length_scale, final_model):
             )
             print(f"Sigma: {model.sigma}")
 
-    trainer.run(mnist_train_loader, max_epochs=30)
+    trainer.run(mnist_train_loader, max_epochs=5)
 
     evaluator.run(mnist_test_loader)
     mnist_test_accuracy = evaluator.state.metrics["accuracy"]
+    # mnist_test_accuracy = 0.0
 
     # evaluator.run(fashion_test_loader)
     # fashion_test_accuracy = evaluator.state.metrics["accuracy"]
@@ -115,11 +117,17 @@ def train_model(l_gradient_penalty, length_scale, final_model):
     # evaluator.run(emnist_test_loader)
     # emnist_test_accuracy = None  # skip it
 
+    # roc_auc_fashionmnist = get_mnist_fashionmnist_ood(model)
+    # roc_auc_emnist = get_mnist_emnist_ood(model)
+
     return model, mnist_test_accuracy
 
 
 
 if __name__ == "__main__":
+    mnist = MNIST(batch_size=64)
+    mnist_test_loader = mnist.get_test()
+
     fashionmnist = FashionMNIST(batch_size=64)
     fashion_test_loader = fashionmnist.get_test()
 
@@ -145,28 +153,23 @@ if __name__ == "__main__":
                 model, mnist_accuracy = train_model( 
                     l_gradient_penalty, length_scale, final_model
                 )
-                roc_auc_fashionmnist = get_mnist_fashionmnist_ood(model)
-                roc_auc_emnist = get_mnist_emnist_ood(model)
+                print("Model trained")
+                # roc_auc_fashionmnist = get_mnist_fashionmnist_ood(model)
+                # roc_auc_emnist = get_mnist_emnist_ood(model)
+                roc_auc_fashionmnist = (0.0, 0.0)  # Placeholder for AUROC FashionMNIST
+                roc_auc_emnist = (0.0, 0.0)
+                # print("AUROC FashionMNIST:", roc_auc_fashionmnist, "AUROC EMNIST:", roc_auc_emnist)
+
+                id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, fashion_test_loader)
+                plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs FashionMNIST (" + str(length_scale) + ")", method="DUQ", dist="MNIST")
+
+                id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, emnist_test_loader)
+                plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs EMNIST (" + str(length_scale) + ")", method="DUQ", dist="MNIST")
 
                 mnist_test_accuracies.append(mnist_accuracy)
                 roc_aucs_fashionmnist.append(roc_auc_fashionmnist)
                 roc_aucs_emnist.append(roc_auc_emnist)
 
-                # plot_roc_curve(
-                #     id_uq=model.uq_scores["mnist"], 
-                #     ood_uq=model.uq_scores["fashion"], 
-                #     title="MNIST vs FashionMNIST", 
-                #     method="DUQ", 
-                #     dist="euclidean"
-                # )
-
-                # plot_roc_curve(
-                #     id_uq=model.uq_scores["mnist"], 
-                #     ood_uq=model.uq_scores["emnist"], 
-                #     title="MNIST vs EMNIST", 
-                #     method="DUQ", 
-                #     dist="euclidean"
-                # )
 
             results[f"lgp{l_gradient_penalty}_ls{length_scale}"] = [
                 (np.mean(mnist_test_accuracies), np.std(mnist_test_accuracies)),
