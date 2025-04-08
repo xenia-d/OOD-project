@@ -49,7 +49,7 @@ class CNN_DUQ(BaselineCNN_FeatureExtractor):
         return distances  
 
     def forward(self, x):
-        z = self.forward(x)    
+        z = self.feature_extractor(x)    
         z = self.last_layer(z)           
         y_pred = self.output_layer(z)    
         return y_pred
