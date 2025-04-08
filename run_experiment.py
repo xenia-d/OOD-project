@@ -8,7 +8,7 @@ from Data.FashionMNIST import FashionMNIST
 from Data.CIFAR10 import CIFAR10
 from Data.CIFAR100 import CIFAR100
 from Data.SVHN import SVHN
-from Model_Architecture.Baseline_CNN import BaselineCNN
+from Model_Architecture.baseline_cnn import BaselineCNN
 from Model_Architecture.Adv_CNN import ResNet18
 from Utils.utils import *
 
@@ -18,7 +18,7 @@ def load_model(model_name, device, dataset="MNIST"):
     elif dataset == "CIFAR10":
         model = ResNet18()
     
-    model.load_state_dict(torch.load("Saved_Models/"+model_name))
+    model.load_state_dict(torch.load("Saved Models/"+model_name))
     model.eval()
     model.to(device)
 
@@ -81,8 +81,8 @@ def basic_experiment():
     emnist_entropys_baseline = get_baseline_entropys(models[0], emnist_test, device)
     emnist_entropys_ensemble = get_ensemble_entropys(models, emnist_test, device)
 
-    plot_roc_curve(mnist_entropys_baseline, emnist_entropys_baseline, "Baseline -- MNIST (ID) vs EMNIST (Near OOD)")
-    plot_roc_curve(mnist_entropys_ensemble, emnist_entropys_ensemble, "Ensemble -- MNIST (ID) vs EMNIST (Near OOD)")
+    plot_roc_curve(mnist_entropys_baseline, emnist_entropys_baseline, "Baseline -- MNIST (ID) vs EMNIST (Near OOD)", method="Baseline", dist="MNIST")
+    plot_roc_curve(mnist_entropys_ensemble, emnist_entropys_ensemble, "Ensemble -- MNIST (ID) vs EMNIST (Near OOD)", method="Ensemble", dist="MNIST")
 
     # Get FashionMNIST Entropys (Far OOD)
     fashion_mnist_data = FashionMNIST(batch_size=64)
@@ -90,8 +90,8 @@ def basic_experiment():
     fashion_mnist_entropys_baseline = get_baseline_entropys(models[0],fashion_mnist_test, device)
     fashion_mnist_entropys_ensemble = get_ensemble_entropys(models, fashion_mnist_test, device)
 
-    plot_roc_curve(mnist_entropys_baseline, fashion_mnist_entropys_baseline, "Baseline -- MNIST (ID) vs Fashion MNIST (Far OOD)")
-    plot_roc_curve(mnist_entropys_ensemble, fashion_mnist_entropys_ensemble, "Ensemble -- MNIST (ID) vs Fashion MNIST (Far OOD)")
+    plot_roc_curve(mnist_entropys_baseline, fashion_mnist_entropys_baseline, "Baseline -- MNIST (ID) vs Fashion MNIST (Far OOD)", method="Baseline", dist="MNIST")
+    plot_roc_curve(mnist_entropys_ensemble, fashion_mnist_entropys_ensemble, "Ensemble -- MNIST (ID) vs Fashion MNIST (Far OOD)", method="Ensemble", dist="MNIST")
 
     # Plot Overall Histograms
     all_dataset_entropys_baseline = [mnist_entropys_baseline, emnist_entropys_baseline, fashion_mnist_entropys_baseline]
@@ -121,8 +121,8 @@ def adv_experiment():
     cifar100_entropy_baseline = get_baseline_entropys(models[0], cifar100_test, device)
     cifar100_entropy_ensemble = get_ensemble_entropys(models, cifar100_test, device)
 
-    plot_roc_curve(cifar10_entropy_baseline, cifar100_entropy_baseline, "Baseline -- CIFAR10 (ID) vs CIFAR100 (Near OOD)")
-    plot_roc_curve(cifar10_entropy_ensemble, cifar100_entropy_ensemble, "Ensemble -- CIFAR10 (ID) vs CIFAR100 (Near OOD)")
+    plot_roc_curve(cifar10_entropy_baseline, cifar100_entropy_baseline, "Baseline -- CIFAR10 (ID) vs CIFAR100 (Near OOD)", "Baseline", "CIFAR10")
+    plot_roc_curve(cifar10_entropy_ensemble, cifar100_entropy_ensemble, "Ensemble -- CIFAR10 (ID) vs CIFAR100 (Near OOD)", "Ensemble", "CIFAR10")
 
     # Get SVHN Entropys (Far OOD)
     svhn_data = SVHN(batch_size=64)
@@ -130,8 +130,8 @@ def adv_experiment():
     svhn_entropys_baseline = get_baseline_entropys(models[0], svhn_test, device)
     svhn_entropy_ensemble = get_ensemble_entropys(models, svhn_test, device)
 
-    plot_roc_curve(cifar10_entropy_baseline, svhn_entropys_baseline, "Baseline -- CIFAR10 (ID) vs SVHN (Far OOD)")
-    plot_roc_curve(cifar10_entropy_ensemble, svhn_entropy_ensemble, "Ensemble -- CIFAR10 (ID) vs SVHN (Far OOD)")
+    plot_roc_curve(cifar10_entropy_baseline, svhn_entropys_baseline, "Baseline -- CIFAR10 (ID) vs SVHN (Far OOD)", "Baseline", "CIFAR10")
+    plot_roc_curve(cifar10_entropy_ensemble, svhn_entropy_ensemble, "Ensemble -- CIFAR10 (ID) vs SVHN (Far OOD)", "Ensemble", "CIFAR10")
 
     # Plot overall metrics
     all_dataset_entropys_baseline = [cifar10_entropy_baseline, cifar100_entropy_baseline, svhn_entropys_baseline]
