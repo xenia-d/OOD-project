@@ -70,8 +70,8 @@ def new_metric(nn, num):
     far_ood_uq = far_ood[:, 2]
 
     log_results(log_file, nn + " Conf " + num, id_uq, near_ood_uq, far_ood_uq)
-    plot_roc_curve(near_ood_uq, id_uq, experiment_name+near_dataset+" (Near OOD) "+num, "ODIN", dist)
-    plot_roc_curve(far_ood_uq, id_uq, experiment_name+far_dataset+" (Far OOD) "+num, "ODIN", dist)
+    plot_roc_curve(near_ood_uq, id_uq, experiment_name+near_dataset+" (Near OOD) "+num, "Conf", dist)
+    plot_roc_curve(far_ood_uq, id_uq, experiment_name+far_dataset+" (Far OOD) "+num, "Conf", dist)
     plot_hist(data=[id_uq, near_ood_uq, far_ood_uq], title=f"Conf {dist} -- Histogram of Dataset Confidences {num}", legend = name_list, bins=10, dist=dist, method="ODIN")
     plot_density(data=[id_uq, near_ood_uq, far_ood_uq], title=f"Conf {dist} -- Density Plot of Dataset Confidences {num}", legend=name_list, dist=dist, method="ODIN")
 
