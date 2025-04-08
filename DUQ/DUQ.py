@@ -36,7 +36,6 @@ class CNN_DUQ(BaselineCNN_FeatureExtractor):
             self.sigma = length_scale
 
     def last_layer(self, z):
-        # z: [batch_size, 128], W: [embedding_size, num_classes, 128]
         return torch.einsum("ij,mnj->imn", z, self.W)
 
     def output_layer(self, z):
@@ -47,16 +46,16 @@ class CNN_DUQ(BaselineCNN_FeatureExtractor):
         diff = z - embeddings.unsqueeze(0) 
         distances = (-(diff**2)).mean(1).div(2 * self.sigma**2).exp()
 
-        return distances  # [batch_size, num_classes]
+        return distances  
 
     def forward(self, x):
-        z = self.forward(x)     # [batch_size, 128]
-        z = self.last_layer(z)           # [batch_size, embedding_size, num_classes]
-        y_pred = self.output_layer(z)    # [batch_size, num_classes]
+        z = self.forward(x)    
+        z = self.last_layer(z)           
+        y_pred = self.output_layer(z)    
         return y_pred
 
     def update_embeddings(self, x, y):
-        z = self.last_layer(self.forward(x))  # [batch, emb_size, num_classes]
+        z = self.last_layer(self.forward(x))  
 
         self.N = self.gamma * self.N + (1 - self.gamma) * y.sum(0)
 
