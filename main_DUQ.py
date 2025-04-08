@@ -55,26 +55,22 @@ def train_model(l_gradient_penalty, length_scale, final_model):
         optimizer.zero_grad()
 
         x, y = batch
-        y = F.one_hot(y, num_classes=10).float()
+        x, y = x.to(device), y.to(device)  # keep y as class indices
 
-        x, y = x.to(device), y.to(device)
         y_pred = model(x)
-
-        loss = F.cross_entropy(y_pred, y)
+        loss = F.cross_entropy(y_pred, y)  # target should NOT be one-hot
         loss.backward()
         optimizer.step()
 
         return loss.item()
 
+
     def eval_step(engine, batch):
         model.eval()
-
         x, y = batch
-        y = F.one_hot(y, num_classes=10).float()
-
         x, y = x.to(device), y.to(device)
-        y_pred = model(x)
 
+        y_pred = model(x)
         return y_pred, y
 
     trainer = Engine(step)
@@ -108,7 +104,7 @@ def train_model(l_gradient_penalty, length_scale, final_model):
             )
             print(f"Sigma: {model.sigma}")
 
-    trainer.run(mnist_train_loader, max_epochs=10)
+    trainer.run(mnist_train_loader, max_epochs=30)
 
     evaluator.run(mnist_test_loader)
     mnist_test_accuracy = evaluator.state.metrics["accuracy"]
@@ -146,7 +142,7 @@ if __name__ == "__main__":
 
             for _ in range(repetition):
                 print(" ### NEW MODEL ### ")
-                model, mnist_accuracy, _, _ = train_model(  # ignore Fashion and EMNIST accuracies
+                model, mnist_accuracy = train_model( 
                     l_gradient_penalty, length_scale, final_model
                 )
                 roc_auc_fashionmnist = get_mnist_fashionmnist_ood(model)
@@ -156,8 +152,21 @@ if __name__ == "__main__":
                 roc_aucs_fashionmnist.append(roc_auc_fashionmnist)
                 roc_aucs_emnist.append(roc_auc_emnist)
 
-                plot_roc_curve(mnist_accuracy, None, title="MNIST vs FashionMNIST")
-                plot_roc_curve(mnist_accuracy, None, title="MNIST vs EMNIST")
+                # plot_roc_curve(
+                #     id_uq=model.uq_scores["mnist"], 
+                #     ood_uq=model.uq_scores["fashion"], 
+                #     title="MNIST vs FashionMNIST", 
+                #     method="DUQ", 
+                #     dist="euclidean"
+                # )
+
+                # plot_roc_curve(
+                #     id_uq=model.uq_scores["mnist"], 
+                #     ood_uq=model.uq_scores["emnist"], 
+                #     title="MNIST vs EMNIST", 
+                #     method="DUQ", 
+                #     dist="euclidean"
+                # )
 
             results[f"lgp{l_gradient_penalty}_ls{length_scale}"] = [
                 (np.mean(mnist_test_accuracies), np.std(mnist_test_accuracies)),

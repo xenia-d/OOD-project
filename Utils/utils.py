@@ -22,7 +22,7 @@ def plot_roc_curve(id_uq, ood_uq, title, method, dist):
     plt.ylabel('True Positive Rate')
     os.makedirs("Saved Plots/"+str(method)+"/"+str(dist), exist_ok=True)
     plt.savefig("Saved Plots/"+str(method)+"/"+str(dist)+"/ROC "+str(title))
-    # plt.show()
+    plt.show()
     plt.close()
 
     return auroc
