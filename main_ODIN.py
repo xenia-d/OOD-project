@@ -31,7 +31,6 @@ import time
 from scipy import misc
 import ODIN.cal as c
 
-
 parser = argparse.ArgumentParser(description='Pytorch Detecting Out-of-distribution examples in neural networks')
 
 parser.add_argument('--nn', default="BASELINE_CNN", type=str,
