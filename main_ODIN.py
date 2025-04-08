@@ -48,10 +48,8 @@ parser.add_argument('--get_metrics_only', action=argparse.BooleanOptionalAction,
 		    help='only include if all the desired softmax scores have already been calculated')
 parser.set_defaults(argument=True)
 
-
 ### TO DO:
 # check the metrics code -- see if it can be used from utils instead of duplicating it there
-# add support for other trained models (1-5)
 # write some code to try different temperature and perturbation values -- should probs be done
 
 # Setting the name of neural networks (nnName)
