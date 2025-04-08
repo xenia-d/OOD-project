@@ -53,7 +53,7 @@ class BaselineCNN_FeatureExtractor(nn.Module):
         self.fc1 = nn.Linear(1600, 128)
         self.dropout = nn.Dropout(0.5)
 
-    def forward(self, x):
+    def feature_extractor(self, x):
         x = self.conv1(x)
         x = F.relu(x)
         x = self.pool(x)
