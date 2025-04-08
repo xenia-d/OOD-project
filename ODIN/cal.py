@@ -35,25 +35,25 @@ start = time.time()
 transform = transforms.Compose([transforms.ToTensor()])
 criterion = nn.CrossEntropyLoss()
 
-def test(nnName, CUDA_DEVICE, metrics_only, model_num, epsilon, temperature):
+def test(nnName, CUDA_DEVICE, metrics_only, model_num, epsilon, temperature, batch_size):
     if nnName == "BASELINE_CNN" : 
-        testsetFarOutData = FashionMNIST(batch_size=1)
+        testsetFarOutData = FashionMNIST(batch_size=batch_size)
         testloaderFarOut = testsetFarOutData.get_test()
         
-        testsetNearOutData = EMNIST(batch_size=1)
+        testsetNearOutData = EMNIST(batch_size=batch_size)
         testloaderNearOut = testsetNearOutData.get_test()
         
-        testsetInData = MNIST(batch_size=1)
+        testsetInData = MNIST(batch_size=batch_size)
         testloaderIn = testsetInData.get_test()
         
     if nnName == "ADVANCED_CNN" : 
-        testsetFarOutData = SVHN(batch_size=1)
+        testsetFarOutData = SVHN(batch_size=batch_size)
         testloaderFarOut = testsetFarOutData.get_test()
         
-        testsetNearOutData = CIFAR100(batch_size=1)
+        testsetNearOutData = CIFAR100(batch_size=batch_size)
         testloaderNearOut = testsetNearOutData.get_test()
         
-        testsetInData = CIFAR10(batch_size=1)
+        testsetInData = CIFAR10(batch_size=batch_size)
         testloaderIn = testsetInData.get_test()
     
     if model_num == "all":

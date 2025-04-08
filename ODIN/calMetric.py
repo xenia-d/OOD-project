@@ -77,6 +77,7 @@ def log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq):
     log_file.write("\n")
 
 def new_metric(nn, num):
+    print("Starting Metric Calculation")
     # [in, near, far]
     if nn == "ADVANCED_CNN":
         folder_name = 'adv_cnn'
