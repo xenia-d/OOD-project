@@ -71,7 +71,7 @@ def test(nnName, CUDA_DEVICE, metrics_only, model_num, epsilon, temperature, bat
         print("Processing model number: ", n)
         model_name = model_name + n
 
-        net1.load_state_dict(torch.load(f"./Saved_Models/{model_name}.pth", map_location=CUDA_DEVICE))
+        net1.load_state_dict(torch.load(f"./Saved Models/{model_name}.pth", map_location=CUDA_DEVICE))
         net1.to(CUDA_DEVICE)
 
         if not metrics_only:

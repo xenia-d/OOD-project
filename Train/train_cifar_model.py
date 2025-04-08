@@ -35,12 +35,12 @@ def train_model(model, train_data, val_data, device, epochs, print_interval=100)
                 train_running_loss = 0.0
                 interval_start = time.time()
 
-        # for inputs, labels in val_data: # Get val loss
-        #     inputs, labels = inputs.to(device), labels.to(device)
-        #     outputs = model(inputs)
-        #     val_loss = criterion(outputs, labels)
-        #     val_running_loss += val_loss.item()
-        # print(f'\t val loss: {val_running_loss / print_interval:.4f}')
+        for inputs, labels in val_data: # Get val loss
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            val_loss = criterion(outputs, labels)
+            val_running_loss += val_loss.item()
+        print(f'\t val loss: {val_running_loss / print_interval:.4f}')
 
 
 
@@ -86,6 +86,6 @@ if __name__ == "__main__":
     cifar_10_test = cifar_10_data.get_test()
 
     train_model(model, cifar_10_train, cifar_10_val, device, epochs=10)
-    # test_model(model, cifar_10_test, device)
+    test_model(model, cifar_10_test, device)
 
     torch.save(model.state_dict(), "Saved_Models/adv_cnn_5.pth")

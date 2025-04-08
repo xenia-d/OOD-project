@@ -27,42 +27,7 @@ import time
 from scipy import misc
 from sklearn.metrics import roc_auc_score, roc_curve
 import seaborn as sn
-# from Utils.utils import plot_roc_curve, plot_hist, plot_density
-
-def plot_roc_curve(id_uq, ood_uq, title):
-    labels = np.concatenate([np.zeros_like(id_uq), np.ones_like(ood_uq)])
-    preds = np.concatenate([id_uq, ood_uq])
-    fpr, tpr, thresholds = roc_curve(labels, preds)
-
-    auroc = roc_auc_score(labels, preds)
-    print("\t", title, "AUROC: ", round(auroc, 3))
-
-    plt.plot(fpr, tpr)
-    full_title = title + " -- AUROC = " + str(round(auroc, 3))
-    plt.title(full_title)
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.savefig("Saved Plots/ODIN/ROC "+str(title)+".png")
-    plt.close()
-
-def plot_hist(data, title, legend=["MNIST", "Fashion MNIST"], bins=10):
-    plt.hist(data, bins=bins)
-    plt.title(title)
-    plt.legend(legend)
-    plt.savefig("Saved Plots/ODIN/Histogram "+str(title)+".png")
-    plt.close()
-
-def plot_density(data, title = "Density Plot of Entropys", legend=["MNIST", "Fashion MNIST"]):
-    plt.figure(figsize=(8, 5))
-    for i, values in enumerate(data):
-        sn.kdeplot(values, label=legend[i], fill=True, alpha=0.5)
-
-    plt.title(title)
-    plt.xlabel("Value")
-    plt.ylabel("Density")
-    plt.legend()
-    plt.savefig("Saved Plots/ODIN/Density "+str(title)+".png")
-    plt.close()
+from Utils.utils import plot_roc_curve, plot_hist, plot_density
 
 def log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq):
     labels = np.concatenate([np.zeros_like(near_ood_uq), np.ones_like(id_uq)])
@@ -82,15 +47,21 @@ def new_metric(nn, num):
     if nn == "ADVANCED_CNN":
         folder_name = 'adv_cnn'
         name_list = ["CIFAR10", "CIFAR100", "SVH"]
+        near_dataset = "CIFAR100"
+        far_dataset = "SVHN"
+        dist = "CIFAR10"
     elif nn == "BASELINE_CNN":
         folder_name = 'baseline_cnn'
         name_list = ["MNIST", "EMNIST", "FashionMNIST"]
+        near_dataset = "EMNIST"
+        far_dataset = "Fashion MNIST"
+        dist = "MNIST"
 
     # open a file to log results
     log_file = open(f"ODIN/results/{folder_name}/{num}_Log.txt", "w")
 
     ## BASELINE ##
-    experiment_name = nn + f"_{num}_ BASE"
+    experiment_name = "Conf -- " + dist + " (ID) vs "
     iid = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_Base_In.txt', delimiter=',')
     near_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_Base_Near_Out.txt', delimiter=',')
     far_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_Base_Far_Out.txt', delimiter=',')
@@ -98,14 +69,14 @@ def new_metric(nn, num):
     near_ood_uq = near_ood[:, 2]
     far_ood_uq = far_ood[:, 2]
 
-    log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq)
-    plot_roc_curve(near_ood_uq, id_uq, experiment_name+" -- Near OOD")
-    plot_roc_curve(far_ood_uq, id_uq, experiment_name+" -- Far OOD")
-    plot_hist([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Histogram of Dataset Confidences", legend = name_list, bins=10)
-    plot_density([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Density Plot of Dataset Confidences", legend=name_list)
+    log_results(log_file, nn + " Conf " + num, id_uq, near_ood_uq, far_ood_uq)
+    plot_roc_curve(near_ood_uq, id_uq, experiment_name+near_dataset+" (Near OOD) "+num, "Conf", dist)
+    plot_roc_curve(far_ood_uq, id_uq, experiment_name+far_dataset+" (Far OOD) "+num, "Conf", dist)
+    plot_hist(data=[id_uq, near_ood_uq, far_ood_uq], title=f"Conf {dist} -- Histogram of Dataset Confidences {num}", legend = name_list, bins=10, dist=dist, method="ODIN")
+    plot_density(data=[id_uq, near_ood_uq, far_ood_uq], title=f"Conf {dist} -- Density Plot of Dataset Confidences {num}", legend=name_list, dist=dist, method="ODIN")
 
     ## ODIN ##
-    experiment_name = nn + f"_{num}_ ODIN"
+    experiment_name = "ODIN -- " + dist + " (ID) vs "
 
     iid = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_ODIN_In.txt', delimiter=',')
     near_ood = np.loadtxt(f'ODIN/softmax_scores/{folder_name}/{num}_confidence_ODIN_Near_Out.txt', delimiter=',')
@@ -114,11 +85,11 @@ def new_metric(nn, num):
     near_ood_uq = near_ood[:, 2]
     far_ood_uq = far_ood[:, 2]
     
-    log_results(log_file, experiment_name, id_uq, near_ood_uq, far_ood_uq)
-    plot_roc_curve(near_ood_uq, id_uq, experiment_name+" -- Near OOD")
-    plot_roc_curve(far_ood_uq, id_uq, experiment_name+" -- Far OOD")
-    plot_hist([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Histogram of Dataset Entropys", legend=name_list, bins=10)
-    plot_density([id_uq, near_ood_uq, far_ood_uq], f"{experiment_name} -- Density Plot of Dataset Entropys", legend=name_list)
+    log_results(log_file, nn + " ODIN " + num, id_uq, near_ood_uq, far_ood_uq)
+    plot_roc_curve(near_ood_uq, id_uq, experiment_name+near_dataset+" (Near OOD) " + num, "ODIN", dist)
+    plot_roc_curve(far_ood_uq, id_uq, experiment_name+far_dataset+" (Far OOD) " + num, "ODIN", dist)
+    plot_hist(data=[id_uq, near_ood_uq, far_ood_uq], title=f"ODIN {dist} -- Histogram of Dataset Confidences {num}", legend=name_list, bins=10, dist=dist, method="ODIN")
+    plot_density(data=[id_uq, near_ood_uq, far_ood_uq], title=f"ODIN {dist} -- Density Plot of Dataset Confidences {num}", legend=name_list, dist=dist, method="ODIN")
 
 
 
