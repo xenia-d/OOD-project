@@ -44,6 +44,8 @@ parser.add_argument('--temperature', default=1000, type=int,
                     help='temperature scaling')
 parser.add_argument('--device', default = 'cpu', type = str,
 		    help='cpu device')
+parser.add_argument('--batch_size', default = 64, type = int,
+		    help='batch size bud')
 parser.add_argument('--get_metrics_only', action=argparse.BooleanOptionalAction,
 		    help='only include if all the desired softmax scores have already been calculated')
 parser.set_defaults(argument=True)
@@ -65,7 +67,7 @@ parser.set_defaults(argument=True)
 def main():
     global args
     args = parser.parse_args()
-    c.test(args.nn, args.device, args.get_metrics_only, args.model_num, args.magnitude, args.temperature)
+    c.test(args.nn, args.device, args.get_metrics_only, args.model_num, args.magnitude, args.temperature, args.batch_size)
 
 if __name__ == '__main__':
     main()

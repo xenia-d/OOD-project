@@ -28,17 +28,20 @@ import numpy as np
 
 def get_softmax_outputs(logits):
     # Calculating the confidence of the output, no perturbation added here, no temperature scaling used
-    nnOutputs = logits.data.cpu().numpy()[0]
-    # Calculate softmax scores, avoid numerical overflow
-    nnOutputs = nnOutputs - np.max(nnOutputs)
-    nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs))
-    return nnOutputs
+    nnOutputs = logits.data.cpu().numpy()#[0]
+    individual_nnOutputs = []
+    for output in nnOutputs:
+        # Calculate softmax scores, avoid numerical overflow
+        output = output - np.max(output)
+        output = np.exp(output)/np.sum(np.exp(output))
+        individual_nnOutputs.append(output)
+    return individual_nnOutputs
 
 def get_gradient(nnOutputs, CUDA_DEVICE, criterion, inputs, outputs):
     # Calculating the perturbation we need to add, that is,
     # the sign of gradient of cross entropy loss w.r.t. input
-    maxIndexTemp = np.argmax(nnOutputs)
-    labels = Variable(torch.LongTensor([maxIndexTemp]).to(CUDA_DEVICE))
+    maxIndexTemp = np.argmax(nnOutputs, axis=1)
+    labels = Variable(torch.LongTensor(maxIndexTemp).to(CUDA_DEVICE))
     loss = criterion(outputs, labels)
     loss.backward()
     
@@ -70,17 +73,20 @@ def get_score(net1, criterion, CUDA_DEVICE, dataloader, noiseMagnitude1, temper,
         #### BASELINE ####
         # Confidence before perturbation and temperature scaling:
         softmaxed_outputs = get_softmax_outputs(outputs) # apply softmax to logit outputs
-        conf_baseline.write("{}, {}, {}\n".format(temper, noiseMagnitude1, np.max(softmaxed_outputs))) 
+        for output in softmaxed_outputs:
+            # print("Full Output: ", output, " - max:", np.max(output))
+            conf_baseline.write("{}, {}, {}\n".format(temper, noiseMagnitude1, np.max(output))) 
 
         #### ODIN ####
         # Using temperature scaling on the logit outputs
         ODIN_outputs = get_ODIN_output(net1, outputs, softmaxed_outputs, inputs, criterion, CUDA_DEVICE, noiseMagnitude1, temper)
         # Calculating the confidence after adding perturbations and temperature scaling
         softmaxed_outputs = get_softmax_outputs(ODIN_outputs)
-        conf_ODIN.write("{}, {}, {}\n".format(temper, noiseMagnitude1, np.max(softmaxed_outputs)))
+        for output in softmaxed_outputs:
+            conf_ODIN.write("{}, {}, {}\n".format(temper, noiseMagnitude1, np.max(output)))
 
-        if j % 1000 == 999:
-            print("{:4}/{:4} images processed, {:.1f} seconds used.".format(j+1, N, time.time()-t0))
+        if j % 100 == 99:
+            print("{:4}/{:4} batches processed, {:.1f} seconds used.".format((j+1), N, time.time()-t0))
             t0 = time.time()
         
         if j == N - 1: break
