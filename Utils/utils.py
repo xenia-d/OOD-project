@@ -22,7 +22,8 @@ def plot_roc_curve(id_uq, ood_uq, title, method, dist):
     plt.ylabel('True Positive Rate')
     os.makedirs("Saved Plots/"+str(method)+"/"+str(dist), exist_ok=True)
     plt.savefig("Saved Plots/"+str(method)+"/"+str(dist)+"/ROC "+str(title))
-    plt.show()
+    # plt.show()
+    plt.close()
 
 def plot_hist(data, title, method, dist, legend=["MNIST", "EMNIST", "Fashion MNIST"], bins=10):
     plt.hist(data, bins=bins)
@@ -30,7 +31,8 @@ def plot_hist(data, title, method, dist, legend=["MNIST", "EMNIST", "Fashion MNI
     plt.legend(legend)
     os.makedirs("Saved Plots/"+str(method)+"/"+str(dist), exist_ok=True)
     plt.savefig("Saved Plots/"+str(method)+"/"+str(dist)+"/Histogram "+str(title))
-    plt.show()
+    # plt.show()
+    plt.close()
 
 def plot_density(data, method, dist, title = "Density Plot of Entropys", legend=["MNIST", "EMNIST", "Fashion MNIST"]):
     plt.figure(figsize=(8, 5))
@@ -43,12 +45,13 @@ def plot_density(data, method, dist, title = "Density Plot of Entropys", legend=
     plt.legend()
     os.makedirs("Saved Plots/"+str(method)+"/"+str(dist), exist_ok=True)
     plt.savefig("Saved Plots/"+str(method)+"/"+str(dist)+"/Density "+str(title))
-    plt.show()
+    # plt.show()
+    plt.close()
 
 def show_max_entropy_examples(image, label):
     plt.imshow(image.squeeze())
     plt.title("High Entropy: " + str(label.item()))
-    plt.show()
+    # plt.show()
 
 
 
