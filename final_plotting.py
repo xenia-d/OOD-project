@@ -15,12 +15,14 @@ def get_dataset_name(dataset, ood_type):
 
     return other_dataset_name
 
-def load_roc(dataset, method, ood_type):
+def load_roc(dataset, method, ood_type, version=None):
     """Load ROC curve data from a saved .npz file"""
     folder_path = f"Saved Rocks/{method}/{dataset}/"
     other_dataset_name = get_dataset_name(dataset, ood_type)
-    file_name = f"{method} -- {dataset} (ID) vs {other_dataset_name} ({ood_type}).npz"
-    data = np.load(os.path.join(folder_path, file_name))
+    file_name = f"{method} -- {dataset} (ID) vs {other_dataset_name} ({ood_type})"
+    if version is not None:
+        file_name = file_name + " " + version
+    data = np.load(os.path.join(folder_path, file_name, ".npz"))
     return data['fpr'], data['tpr']
 
 def load_all_rocs(dataset):
