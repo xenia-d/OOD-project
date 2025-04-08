@@ -37,13 +37,6 @@ criterion = nn.CrossEntropyLoss()
 
 def test(nnName, CUDA_DEVICE, metrics_only, model_num, epsilon, temperature):
     if nnName == "BASELINE_CNN" : 
-        net1 = BaselineCNN()
-        model_name = 'baseline_cnn_'
-    elif nnName == "ADVANCED_CNN" :
-        net1 = ResNet18()
-        model_name = 'adv_cnn_'
-
-    if nnName == "BASELINE_CNN" : 
         testsetFarOutData = FashionMNIST(batch_size=1)
         testloaderFarOut = testsetFarOutData.get_test()
         
@@ -64,11 +57,17 @@ def test(nnName, CUDA_DEVICE, metrics_only, model_num, epsilon, temperature):
         testloaderIn = testsetInData.get_test()
     
     if model_num == "all":
-        model_list = [1,2,3,4,5]
+        model_list = ["1","2","3","4","5"]
     else:
         model_list = [model_num]
     
     for n in model_list:
+        if nnName == "BASELINE_CNN" : 
+            net1 = BaselineCNN()
+            model_name = 'baseline_cnn_'
+        elif nnName == "ADVANCED_CNN" :
+            net1 = ResNet18()
+            model_name = 'adv_cnn_'
         print("Processing model number: ", n)
         model_name = model_name + n
 
