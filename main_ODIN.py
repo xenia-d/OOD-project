@@ -50,10 +50,6 @@ parser.add_argument('--get_metrics_only', action=argparse.BooleanOptionalAction,
 		    help='only include if all the desired softmax scores have already been calculated')
 parser.set_defaults(argument=True)
 
-### TO DO:
-# check the metrics code -- see if it can be used from utils instead of duplicating it there
-# write some code to try different temperature and perturbation values -- should probs be done
-
 # Setting the name of neural networks (nnName)
 # Custom CNN trained on MNIST: BASELINE_CNN
 # Custom CNN trained on CIFAR10: ADVANCED_CNN
@@ -63,6 +59,10 @@ parser.set_defaults(argument=True)
 
 # Setting the temperature
 # temperature = 1000
+
+# If you have already collected all the confidence scores, 
+# set get_metrics_only = True to go straight to evaluation
+# get_metrics_only = True
 
 def main():
     global args
