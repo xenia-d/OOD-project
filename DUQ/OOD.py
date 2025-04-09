@@ -90,8 +90,43 @@ def get_mnist_emnist_ood(model):
 
     return get_auroc_ood(mnist_test, emnist_test, model)
 
+def get_cifar_svhn_ood(model):
+    cifar10 = CIFAR10(batch_size=2000)
+    svhn = SVHN(batch_size=2000)
+    cifar10_test = cifar10.get_test()  
+    svhn_test = svhn.get_test()  
+
+    # print("CIFAR10 Test Size:", len(cifar10_test.dataset))
+    # print("SVHN Test Size:", len(svhn_test.dataset))
+
+    return get_auroc_ood(cifar10_test, svhn_test, model)
+
+def get_cifar_cifar100_ood(model):
+    cifar10 = CIFAR10(batch_size=2000)
+    cifar100 = CIFAR100(batch_size=2000)
+    cifar10_test = cifar10.get_test()  
+    cifar100_test = cifar100.get_test()  
+
+    # print("CIFAR10 Test Size:", len(cifar10_test.dataset))
+    # print("CIFAR100 Test Size:", len(cifar100_test.dataset))
+
+    return get_auroc_ood(cifar10_test, cifar100_test, model)
+
 def get_anomaly_targets_and_scores(model, id_dataset, ood_dataset, device):
     id_scores, _ = loop_over_dataloader(model, id_dataset, device)
     ood_scores, _ = loop_over_dataloader(model, ood_dataset, device)
 
     return id_scores, ood_scores
+
+
+def get_auroc_classification(dataset, model):
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=500, shuffle=False, num_workers=0, pin_memory=False
+    )
+
+    scores, accuracies = loop_over_dataloader(model, dataloader)
+
+    accuracy = np.mean(accuracies)
+    roc_auc = roc_auc_score(1 - accuracies, scores)
+
+    return accuracy, roc_auc
