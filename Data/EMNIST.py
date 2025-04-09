@@ -2,15 +2,14 @@ import torchvision.transforms as transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader, Subset
 import matplotlib.pyplot as plt
-import random
 
 class EMNIST:
     def __init__(self, batch_size):
         self.batch_size = batch_size
         self.transform = transforms.Compose(
             [transforms.ToTensor(),
-            lambda img: transforms.functional.rotate(img, -90),
-            lambda img: transforms.functional.hflip(img)],
+            lambda img: transforms.functional.rotate(img, -90), # rotate 90 degrees and 
+            lambda img: transforms.functional.hflip(img)], # flip cuz they are not oriented in the same direction as MNIST
             )
 
     def get_train(self):

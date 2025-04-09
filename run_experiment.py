@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import scipy.stats
+from PIL import Image
 
 from Data.MNIST import MNIST
 from Data.EMNIST import EMNIST
