@@ -1,6 +1,6 @@
 import torchvision.transforms as transforms
 from torchvision import datasets
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
 class SVHN:
     def __init__(self, batch_size):
@@ -12,9 +12,11 @@ class SVHN:
 
     def get_train(self):
         train_data = datasets.SVHN(root='Data', split="train", download=True, transform=self.transform)
+        train_data, val_data = random_split(train_data, [0.9, 0.1])
         train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
+        val_loader = DataLoader(val_data, batch_size=self.batch_size, shuffle=True)
 
-        return train_loader
+        return train_loader, val_loader
     
     def get_test(self):
         test_data = datasets.SVHN(root='Data', split="test", download=True, transform=self.transform)
