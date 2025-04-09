@@ -117,3 +117,16 @@ def get_anomaly_targets_and_scores(model, id_dataset, ood_dataset, device):
     ood_scores, _ = loop_over_dataloader(model, ood_dataset, device)
 
     return id_scores, ood_scores
+
+
+def get_auroc_classification(dataset, model):
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=500, shuffle=False, num_workers=0, pin_memory=False
+    )
+
+    scores, accuracies = loop_over_dataloader(model, dataloader)
+
+    accuracy = np.mean(accuracies)
+    roc_auc = roc_auc_score(1 - accuracies, scores)
+
+    return accuracy, roc_auc

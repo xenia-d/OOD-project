@@ -10,9 +10,8 @@ from torchvision.models import resnet18
 from ignite.engine import Events, Engine
 from ignite.metrics import Accuracy, Average, Loss
 from ignite.contrib.handlers import ProgressBar
-from utils.wide_resnet import WideResNet
 from DUQ.DUQ import ResNet_DUQ
-from DUQ.OOD import get_cifar_svhn_ood, get_cifar_cifar100_ood
+from DUQ.OOD import get_cifar_svhn_ood, get_cifar_cifar100_ood, get_auroc_classification
 from Data import FashionMNIST, EMNIST, SVHN, CIFAR10, MNIST, CIFAR100
 
 
@@ -32,7 +31,7 @@ def main(
     writer = SummaryWriter(log_dir=f"runs/{output_dir}")
 
     cifar10 = CIFAR10(batch_size=2000)
-    cifar_train_dataset = cifar10.get_train()
+    cifar_train_dataset, cifar_val_dataset = cifar10.get_train_val()
     cifar_test_dataset = cifar10.get_test()
 
     num_classes = 10
@@ -41,17 +40,17 @@ def main(
     idx = list(range(len(cifar_train_dataset)))
     random.shuffle(idx)
 
-    if final_model:
-        train_dataset = cifar_train_dataset
-        val_dataset = test_dataset
-    else:
-        val_size = int(len(dataset) * 0.8)
-        train_dataset = torch.utils.data.Subset(dataset, idx[:val_size])
-        val_dataset = torch.utils.data.Subset(dataset, idx[val_size:])
+    # if final_model:
+    #     train_dataset = cifar_train_dataset
+    #     val_dataset = cifar_test_dataset
+    # else:
+    #     val_size = int(len(cifar_train_dataset) * 0.8)
+    #     train_dataset = torch.utils.data.Subset(cifar_train_dataset, idx[:val_size])
+    #     val_dataset = torch.utils.data.Subset(cifar_train_dataset, idx[val_size:])
 
-        val_dataset.transform = (
-            test_dataset.transform
-        )  # Test time preprocessing for validation
+    #     val_dataset.transform = (
+    #         cifar_test_dataset.transform
+    #     )  # Test time preprocessing for validation
 
     if architecture == "WRN":
         model_output_size = 640
@@ -60,7 +59,7 @@ def main(
         feature_extractor = WideResNet()
     elif architecture == "ResNet18":
         model_output_size = 512
-        epochs = 100
+        epochs = 10
         milestones = [25, 50, 75]
         feature_extractor = resnet18()
 
@@ -83,7 +82,9 @@ def main(
         length_scale,
         gamma,
     )
-    model = model.cuda()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
 
     optimizer = torch.optim.SGD(
         model.parameters(), lr=learning_rate, momentum=0.9, weight_decay=weight_decay
@@ -122,7 +123,7 @@ def main(
         optimizer.zero_grad()
 
         x, y = batch
-        x, y = x.cuda(), y.cuda()
+        x, y = x.to(device), y.to(device)
 
         x.requires_grad_(True)
 
@@ -182,19 +183,19 @@ def main(
     pbar = ProgressBar(dynamic_ncols=True)
     pbar.attach(trainer)
 
-    kwargs = {"num_workers": 4, "pin_memory": True}
+    kwargs = {"num_workers": 0, "pin_memory": True}
 
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True, **kwargs
-    )
+    # train_loader = torch.utils.data.DataLoader(
+    #     train_dataset, batch_size=batch_size, shuffle=True, drop_last=True, **kwargs
+    # )
 
-    val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, **kwargs
-    )
+    # val_loader = torch.utils.data.DataLoader(
+    #     val_dataset, batch_size=batch_size, shuffle=False, **kwargs
+    # )
 
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=False, **kwargs
-    )
+    # test_loader = torch.utils.data.DataLoader(
+    #     test_dataset, batch_size=batch_size, shuffle=False, **kwargs
+    # )
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_results(trainer):
@@ -211,12 +212,12 @@ def main(
             writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
             writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
 
-            accuracy, auroc = get_auroc_classification(val_dataset, model)
+            accuracy, auroc = get_auroc_classification(cifar_val_dataset, model)
             print(f"AUROC - uncertainty: {auroc}")
             writer.add_scalar("OoD/val_accuracy", accuracy, trainer.state.epoch)
             writer.add_scalar("OoD/roc_auc_classification", auroc, trainer.state.epoch)
 
-        evaluator.run(val_loader)
+        evaluator.run(cifar_val_dataset)
         metrics = evaluator.state.metrics
         acc = metrics["accuracy"]
         bce = metrics["bce"]
@@ -240,8 +241,8 @@ def main(
 
         scheduler.step()
 
-    trainer.run(train_loader, max_epochs=epochs)
-    evaluator.run(test_loader)
+    trainer.run(cifar_train_dataset, max_epochs=epochs)
+    evaluator.run(cifar_test_dataset)
     acc = evaluator.state.metrics["accuracy"]
 
     print(f"Test - Accuracy {acc:.4f}")
@@ -307,7 +308,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--output_dir", type=str, default="results", help="set output folder"
+        "--output_dir", type=str, default="DUQ_CIFAR_results", help="set output folder"
     )
 
     # Below setting cannot be used for model selection,
@@ -323,6 +324,6 @@ if __name__ == "__main__":
     kwargs = vars(args)
     print("input args:\n", json.dumps(kwargs, indent=4, separators=(",", ":")))
 
-    pathlib.Path("runs/" + args.output_dir).mkdir(exist_ok=True)
+    pathlib.Path(args.output_dir).mkdir(exist_ok=True)
 
     main(**kwargs)
