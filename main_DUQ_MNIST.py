@@ -26,7 +26,7 @@ def train_model(l_gradient_penalty, length_scale, final_model):
 
     num_classes = 10
     embedding_size = 256
-    learnable_length_scale = False
+    learnable_length_scale = True 
     gamma = 0.999
 
     model = CNN_DUQ(
@@ -56,7 +56,7 @@ def train_model(l_gradient_penalty, length_scale, final_model):
         optimizer.zero_grad()
 
         x, y = batch
-        x, y = x.to(device), y.to(device)  # keep y as class indices
+        x, y = x.to(device), y.to(device)  
 
         y_pred = model(x)
         loss = F.cross_entropy(y_pred, y)  # target should NOT be one-hot
@@ -120,7 +120,7 @@ def train_model(l_gradient_penalty, length_scale, final_model):
     # roc_auc_fashionmnist = get_mnist_fashionmnist_ood(model)
     # roc_auc_emnist = get_mnist_emnist_ood(model)
 
-    return model, mnist_test_accuracy
+    return model, mnist_test_accuracy, model.sigma  
 
 
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
             for _ in range(repetition):
                 print(" ### NEW MODEL ### ")
-                model, mnist_accuracy = train_model( 
+                model, mnist_accuracy, sigma = train_model( 
                     l_gradient_penalty, length_scale, final_model
                 )
                 print("Model trained")
