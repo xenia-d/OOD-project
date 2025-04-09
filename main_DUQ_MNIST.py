@@ -104,8 +104,8 @@ def train_model(l_gradient_penalty, length_scale, final_model, id_train, id_val,
 
 
 if __name__ == "__main__":
+    # Load id, near ood & far ood
     mnist = MNIST(batch_size=64)
-    mnist_train_loader, mnist_val_loader = mnist.get_train()
     mnist_test_loader = mnist.get_test()
 
     fashionmnist = FashionMNIST(batch_size=64)
@@ -122,13 +122,14 @@ if __name__ == "__main__":
     l_gradient_penalties = [0.0]
     length_scales = [0.05, 0.1, 0.2, 0.3, 0.5, 1.0]
 
-    repetition = 1
+    repetition = 5
     final_model = False
 
     results = {}
 
     model_ood_aurocs = []
     all_models = []
+    # Loop through hyperparameters and find best val ood detection (auroc)
     for l_gradient_penalty in l_gradient_penalties:
         for length_scale in length_scales:
             mnist_val_accuracies = []
@@ -137,6 +138,7 @@ if __name__ == "__main__":
             models = []
             for _ in range(repetition):
                 print(" ### NEW MODEL ### ")
+                mnist_train_loader, mnist_val_loader = mnist.get_train()
                 model, mnist_val_accuracy = train_model( 
                     l_gradient_penalty, length_scale, final_model, mnist_train_loader, mnist_val_loader, emnist_val_loader, fashion_val_loader, device
                 )
@@ -170,10 +172,10 @@ if __name__ == "__main__":
         print("Evaluating best model OOD detection on test set, sigma:", best_sigma)
 
         id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, fashion_test_loader, device)
-        plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs FashionMNIST (" + str(length_scale) + ")", method="DUQ", dist="MNIST")
+        plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs FashionMNIST (" + str(best_sigma) + ") " + str(i), method="DUQ", dist="MNIST")
 
         id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, emnist_test_loader, device)
-        plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs EMNIST (" + str(length_scale) + ")", method="DUQ", dist="MNIST")
+        plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs EMNIST (" + str(best_sigma) + ") " + str(i), method="DUQ", dist="MNIST")
 
         torch.save(best_model.state_dict(), "Saved Models/baseline_duq_" + str(i) + ".pth")
 
