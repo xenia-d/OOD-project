@@ -208,7 +208,12 @@ def main(
 
         if trainer.state.epoch > (epochs - 5):
             accuracy, auroc = get_cifar_svhn_ood(model)
-            print(f"Test Accuracy: {accuracy}, AUROC: {auroc}")
+            print(f"Test Accuracy CIFAR10-SVHN: {accuracy}, AUROC: {auroc}")
+            writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
+            writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
+
+            accuracy, auroc = get_cifar_cifar100_ood(model)
+            print(f"Test Accuracy CIFAR10-CIFAR100: {accuracy}, AUROC: {auroc}")
             writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
             writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
 
@@ -253,6 +258,14 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+
+    cifar100 = CIFAR100(batch_size=2000)
+    cifar100_train_dataset, cifar100_val_dataset = cifar100.get_train_val()
+    cifar100_test_dataset = cifar100.get_test()
+
+    svhn = SVHN(batch_size=2000)
+    svhn_train_dataset, svhn_val_dataset = svhn.get_train_val()
+    svhn_test_dataset = svhn.get_test()
 
     parser.add_argument(
         "--architecture",
