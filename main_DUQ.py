@@ -1,28 +1,20 @@
-import random
 import numpy as np
 import torch
-import torch.utils.data
 from torch.nn import functional as F
 from ignite.engine import Events, Engine
 from ignite.metrics import Accuracy, Loss
 from ignite.handlers import ProgressBar
 from DUQ.DUQ import CNN_DUQ  
 from Data import FashionMNIST, EMNIST, MNIST  
-from DUQ.OOD import get_mnist_fashionmnist_ood, get_mnist_emnist_ood, get_anomaly_targets_and_scores
-from Utils.utils import plot_roc_curve
-from matplotlib import pyplot as plt
+from DUQ.OOD import get_auroc_ood, get_anomaly_targets_and_scores
+from Utils.utils import plot_roc_curve, get_best_model_idx
 
 
-def train_model(l_gradient_penalty, length_scale, final_model):
-    mnist = MNIST(batch_size=64)
-    mnist_train_loader = mnist.get_train()
-    mnist_test_loader = mnist.get_test()
+def train_model(l_gradient_penalty, length_scale, final_model, id_train, id_val, near_ood_val, far_ood_val, device):
+    mnist_train_loader, mnist_val_loader = id_train, id_val
 
-    fashionmnist = FashionMNIST(batch_size=64)
-    fashion_test_loader = fashionmnist.get_test()
-
-    emnist = EMNIST(batch_size=64)
-    emnist_test_loader = emnist.get_test()
+    fashion_val_loader = far_ood_val
+    emnist_val_loader = near_ood_val
 
     num_classes = 10
     embedding_size = 256
@@ -37,8 +29,6 @@ def train_model(l_gradient_penalty, length_scale, final_model):
         gamma,
     )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     model = model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -49,7 +39,7 @@ def train_model(l_gradient_penalty, length_scale, final_model):
 
     def output_transform_acc(output):
         y_pred, y = output
-        return y_pred, y #torch.argmax(y, dim=1)
+        return y_pred, y
 
     def step(engine, batch):
         model.train()
@@ -64,7 +54,6 @@ def train_model(l_gradient_penalty, length_scale, final_model):
         optimizer.step()
 
         return loss.item()
-
 
     def eval_step(engine, batch):
         model.eval()
@@ -90,9 +79,9 @@ def train_model(l_gradient_penalty, length_scale, final_model):
         scheduler.step()
 
         if trainer.state.epoch % 5 == 0:
-            evaluator.run(mnist_test_loader)
-            _, roc_auc_fashionmnist = get_mnist_fashionmnist_ood(model)
-            _, roc_auc_emnist = get_mnist_emnist_ood(model)
+            evaluator.run(mnist_val_loader)
+            _, roc_auc_fashionmnist = get_auroc_ood(mnist_val_loader, fashion_val_loader, model, device)
+            _, roc_auc_emnist = get_auroc_ood(mnist_val_loader, emnist_val_loader, model, device)
 
             metrics = evaluator.state.metrics
 
@@ -107,18 +96,8 @@ def train_model(l_gradient_penalty, length_scale, final_model):
 
     trainer.run(mnist_train_loader, max_epochs=5)
 
-    evaluator.run(mnist_test_loader)
+    evaluator.run(mnist_val_loader)
     mnist_test_accuracy = evaluator.state.metrics["accuracy"]
-    # mnist_test_accuracy = 0.0
-
-    # evaluator.run(fashion_test_loader)
-    # fashion_test_accuracy = evaluator.state.metrics["accuracy"]
-
-    # evaluator.run(emnist_test_loader)
-    # emnist_test_accuracy = None  # skip it
-
-    # roc_auc_fashionmnist = get_mnist_fashionmnist_ood(model)
-    # roc_auc_emnist = get_mnist_emnist_ood(model)
 
     return model, mnist_test_accuracy
 
@@ -126,13 +105,19 @@ def train_model(l_gradient_penalty, length_scale, final_model):
 
 if __name__ == "__main__":
     mnist = MNIST(batch_size=64)
+    mnist_train_loader, mnist_val_loader = mnist.get_train()
     mnist_test_loader = mnist.get_test()
 
     fashionmnist = FashionMNIST(batch_size=64)
+    _, fashion_val_loader = fashionmnist.get_train()
     fashion_test_loader = fashionmnist.get_test()
 
     emnist = EMNIST(batch_size=64)
+    _, emnist_val_loader = emnist.get_train()
     emnist_test_loader = emnist.get_test()
+
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # For mac
 
     l_gradient_penalties = [0.0]
     length_scales = [0.05, 0.1, 0.2, 0.3, 0.5, 1.0]
@@ -142,40 +127,54 @@ if __name__ == "__main__":
 
     results = {}
 
+    model_ood_aurocs = []
+    all_models = []
     for l_gradient_penalty in l_gradient_penalties:
         for length_scale in length_scales:
-            mnist_test_accuracies = []
-            roc_aucs_fashionmnist = []
-            roc_aucs_emnist = []
-
+            mnist_val_accuracies = []
+            val_roc_aucs_fashionmnist = []
+            val_roc_aucs_emnist = []
+            models = []
             for _ in range(repetition):
                 print(" ### NEW MODEL ### ")
-                model, mnist_accuracy = train_model( 
-                    l_gradient_penalty, length_scale, final_model
+                model, mnist_val_accuracy = train_model( 
+                    l_gradient_penalty, length_scale, final_model, mnist_train_loader, mnist_val_loader, emnist_val_loader, fashion_val_loader, device
                 )
                 print("Model trained")
-                # roc_auc_fashionmnist = get_mnist_fashionmnist_ood(model)
-                # roc_auc_emnist = get_mnist_emnist_ood(model)
-                roc_auc_fashionmnist = (0.0, 0.0)  # Placeholder for AUROC FashionMNIST
-                roc_auc_emnist = (0.0, 0.0)
-                # print("AUROC FashionMNIST:", roc_auc_fashionmnist, "AUROC EMNIST:", roc_auc_emnist)
+                val_roc_auc_fashionmnist = get_auroc_ood(mnist_val_loader, fashion_val_loader, model, device)
+                val_roc_auc_emnist = get_auroc_ood(mnist_val_loader, emnist_val_loader, model, device)
+                print("AUROC FashionMNIST:", val_roc_auc_fashionmnist, "AUROC EMNIST:", val_roc_auc_emnist)
 
-                id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, fashion_test_loader)
-                plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs FashionMNIST (" + str(length_scale) + ")", method="DUQ", dist="MNIST")
+                mnist_val_accuracies.append(mnist_val_accuracy)
+                val_roc_aucs_fashionmnist.append(val_roc_auc_fashionmnist)
+                val_roc_aucs_emnist.append(val_roc_auc_emnist)
 
-                id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, emnist_test_loader)
-                plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs EMNIST (" + str(length_scale) + ")", method="DUQ", dist="MNIST")
-
-                mnist_test_accuracies.append(mnist_accuracy)
-                roc_aucs_fashionmnist.append(roc_auc_fashionmnist)
-                roc_aucs_emnist.append(roc_auc_emnist)
+                models.append(model) # Save the model for later use
 
 
             results[f"lgp{l_gradient_penalty}_ls{length_scale}"] = [
-                (np.mean(mnist_test_accuracies), np.std(mnist_test_accuracies)),
-                (np.mean(roc_aucs_fashionmnist), np.std(roc_aucs_fashionmnist)),
-                (np.mean(roc_aucs_emnist), np.std(roc_aucs_emnist)),
+                (np.mean(mnist_val_accuracies), np.std(mnist_val_accuracies)),
+                (np.mean(val_roc_aucs_fashionmnist), np.std(val_roc_aucs_fashionmnist)),
+                (np.mean(val_roc_aucs_emnist), np.std(val_roc_aucs_emnist)),
             ]
             print(results[f"lgp{l_gradient_penalty}_ls{length_scale}"])
+            model_ood_aurocs.append((np.mean(val_roc_aucs_fashionmnist), np.mean(val_roc_aucs_emnist)))
+            all_models.append(models)
+
+    # Test on model with best validation ood detection
+    best_model_on_val_idx = get_best_model_idx(model_ood_aurocs)
+    best_sigma = length_scales[best_model_on_val_idx % len(length_scales)]
+    best_models = all_models[best_model_on_val_idx] # List of models unless repetition is 1
+
+    for i, best_model in enumerate(best_models): 
+        print("Evaluating best model OOD detection on test set, sigma:", best_sigma)
+
+        id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, fashion_test_loader, device)
+        plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs FashionMNIST (" + str(length_scale) + ")", method="DUQ", dist="MNIST")
+
+        id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, emnist_test_loader, device)
+        plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs EMNIST (" + str(length_scale) + ")", method="DUQ", dist="MNIST")
+
+        torch.save(best_model.state_dict(), "Saved Models/baseline_duq_" + str(i) + ".pth")
 
     print(results)
