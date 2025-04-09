@@ -1,6 +1,6 @@
 import torchvision.transforms as transforms
 from torchvision import datasets
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
 class MNIST:
     def __init__(self, batch_size):
@@ -9,9 +9,11 @@ class MNIST:
 
     def get_train(self):
         train_data = datasets.MNIST(root='Data', train=True, download=True, transform=self.transform)
+        train_data, val_data = random_split(train_data, [0.9, 0.1])
         train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
+        val_loader = DataLoader(val_data, batch_size=self.batch_size, shuffle=True)
 
-        return train_loader
+        return train_loader, val_loader
     
     def get_test(self):
         test_data = datasets.MNIST(root='Data', train=False, download=True, transform=self.transform)

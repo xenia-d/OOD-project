@@ -1,24 +1,25 @@
 import torchvision.transforms as transforms
 from torchvision import datasets
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, random_split
 import matplotlib.pyplot as plt
-import random
 
 class EMNIST:
     def __init__(self, batch_size):
         self.batch_size = batch_size
         self.transform = transforms.Compose(
             [transforms.ToTensor(),
-            lambda img: transforms.functional.rotate(img, -90),
-            lambda img: transforms.functional.hflip(img)],
+            lambda img: transforms.functional.rotate(img, -90), # rotate 90 degrees and 
+            lambda img: transforms.functional.hflip(img)], # flip cuz they are not oriented in the same direction as MNIST
             )
 
     def get_train(self):
         train_data = datasets.EMNIST(root='Data', split='balanced', train=True, download=True, transform=self.transform)
         filtered_train_data = self.filter_numbers_out(train_data)
-        train_loader = DataLoader(filtered_train_data, batch_size=self.batch_size, shuffle=True)
+        train_data, val_data = random_split(filtered_train_data, [0.9, 0.1])
+        train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
+        val_loader = DataLoader(val_data, batch_size=self.batch_size, shuffle=True)
 
-        return train_loader
+        return train_loader, val_loader
     
     def get_test(self):
         test_data = datasets.EMNIST(root='Data', split='balanced', train=False, download=True, transform=self.transform)

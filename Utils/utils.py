@@ -55,5 +55,12 @@ def show_max_entropy_examples(image, label):
     plt.title("High Entropy: " + str(label.item()))
     # plt.show()
 
+def get_best_model_idx(auroc_list):
+    avg_aurocs = []
+    for far_ood_auroc, near_ood_auroc in auroc_list:
+        avg_aurocs.append((far_ood_auroc + near_ood_auroc) / 2)
+    best_model_idx = np.argmax(avg_aurocs)
+    return best_model_idx
+
 
 

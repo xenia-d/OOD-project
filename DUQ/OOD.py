@@ -6,7 +6,7 @@ from Data import FashionMNIST, EMNIST, SVHN, CIFAR10, MNIST, CIFAR100
 def prepare_ood_datasets(true_dataset, ood_dataset):
     true_dataset_object = true_dataset.dataset
     ood_dataset_object = ood_dataset.dataset
-    ood_dataset_object.transform = true_dataset_object.transform
+    # ood_dataset_object.transform = true_dataset_object.transform
 
     datasets = [true_dataset_object, ood_dataset_object]
 
@@ -22,7 +22,7 @@ def prepare_ood_datasets(true_dataset, ood_dataset):
 
     return dataloader, anomaly_targets
 
-def loop_over_dataloader(model, dataloader):
+def loop_over_dataloader(model, dataloader, device):
     model.eval()
 
     scores = []
@@ -30,8 +30,8 @@ def loop_over_dataloader(model, dataloader):
 
     with torch.no_grad():
         for data, target in dataloader:
-            data = data
-            target = target
+            data = data.to(device)
+            target = target.to(device)
 
             output = model(data)
             kernel_distance, pred = output.max(1)
@@ -46,10 +46,10 @@ def loop_over_dataloader(model, dataloader):
 
     return scores, accuracies
 
-def get_auroc_ood(true_dataset, ood_dataset, model):
+def get_auroc_ood(true_dataset, ood_dataset, model, device):
     dataloader, anomaly_targets = prepare_ood_datasets(true_dataset, ood_dataset)
 
-    scores, accuracies = loop_over_dataloader(model, dataloader)
+    scores, accuracies = loop_over_dataloader(model, dataloader, device)
 
     accuracy = np.mean(accuracies[: len(true_dataset)])  
     roc_auc = roc_auc_score(anomaly_targets, scores)  
@@ -112,8 +112,8 @@ def get_cifar_cifar100_ood(model):
 
     return get_auroc_ood(cifar10_test, cifar100_test, model)
 
-def get_anomaly_targets_and_scores(model, id_dataset, ood_dataset):
-    id_scores, _ = loop_over_dataloader(model, id_dataset)
-    ood_scores, _ = loop_over_dataloader(model, ood_dataset)
+def get_anomaly_targets_and_scores(model, id_dataset, ood_dataset, device):
+    id_scores, _ = loop_over_dataloader(model, id_dataset, device)
+    ood_scores, _ = loop_over_dataloader(model, ood_dataset, device)
 
     return id_scores, ood_scores
