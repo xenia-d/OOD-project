@@ -252,18 +252,18 @@ def main(
 
     print(f"Test - Accuracy {acc:.4f}")
 
-    torch.save(model.state_dict(), f"runs/{output_dir}/model.pt")
+    torch.save(model.state_dict(), f"DUQ - CIFAR runs/{output_dir}/model.pt")
     writer.close()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    cifar100 = CIFAR100(batch_size=2000)
+    cifar100 = CIFAR100(batch_size=64)
     cifar100_train_dataset, cifar100_val_dataset = cifar100.get_train_val()
     cifar100_test_dataset = cifar100.get_test()
 
-    svhn = SVHN(batch_size=2000)
+    svhn = SVHN(batch_size=64)
     svhn_train_dataset, svhn_val_dataset = svhn.get_train_val()
     svhn_test_dataset = svhn.get_test()
 
@@ -321,7 +321,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--output_dir", type=str, default="DUQ_CIFAR_results", help="set output folder"
+        "--output_dir", type=str, default="results", help="set output folder"
     )
 
     # Below setting cannot be used for model selection,
