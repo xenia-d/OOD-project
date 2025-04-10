@@ -69,6 +69,10 @@ def make_dataframe():
                     fpr = data['fpr']
                     tpr = data['tpr']
                     roc_auc = np.trapz(tpr, fpr)
+                    if method == "Baseline":
+                        method = "Entropy"
+                    if method == "Conf":
+                        method = "Confidence"
                     # print(f"Method: {method}, ID Dataset: {dataset}, OOD Dataset: {ood_dataset}, AUROC: {roc_auc}, Distance: {distance}")
                     rows.append({
                         "Method": method,
@@ -100,6 +104,7 @@ def make_barplot(target_dataset=None):
     ax.set_title(f"AUROC for Different Methods on {target_dataset} Dataset")
     diff = df["AUROC"].max() - df["AUROC"].min()
     ax.set(ylim=(min(df["AUROC"]-(0.1*diff)), 1))
+    plt.tight_layout()
     plt.show()
 
 def plot_all_rocs():
@@ -130,6 +135,7 @@ def plot_all_rocs():
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
         plt.title(title)
+        plt.tight_layout()
         plt.legend()
         plt.savefig("Saved Plots/Overall/"+title)
         plt.show()
@@ -138,3 +144,4 @@ def plot_all_rocs():
 
 plot_all_rocs()
 make_barplot("MNIST")
+make_barplot("CIFAR10")
