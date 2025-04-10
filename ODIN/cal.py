@@ -67,7 +67,7 @@ def test(nnName, CUDA_DEVICE, metrics_only, model_num, epsilon, temperature, bat
             model_name = 'baseline_cnn_'
         elif nnName == "ADVANCED_CNN" :
             net1 = ResNet18()
-            model_name = 'adv_cnn_'
+            model_name = 'adv_cnn_2_'
         print("Processing model number: ", n)
         model_name = model_name + n
 

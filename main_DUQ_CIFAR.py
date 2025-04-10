@@ -26,11 +26,14 @@ def main(
     gamma,
     weight_decay,
     final_model,
-    output_dir,
+    output_dir
 ):
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # For Mac
+
     writer = SummaryWriter(log_dir=f"runs/{output_dir}")
 
-    cifar10 = CIFAR10(batch_size=2000)
+    cifar10 = CIFAR10(batch_size=batch_size)
     cifar_train_dataset, cifar_val_dataset = cifar10.get_train_val()
     cifar_test_dataset = cifar10.get_test()
 
@@ -83,7 +86,6 @@ def main(
         gamma,
     )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
     optimizer = torch.optim.SGD(
@@ -277,7 +279,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=128,
+        default=64,
         help="Batch size to use for training (default: 128)",
     )
 
@@ -324,6 +326,7 @@ if __name__ == "__main__":
         "--output_dir", type=str, default="results", help="set output folder"
     )
 
+
     # Below setting cannot be used for model selection,
     # because the validation set equals the test set.
     parser.add_argument(
@@ -338,5 +341,6 @@ if __name__ == "__main__":
     print("input args:\n", json.dumps(kwargs, indent=4, separators=(",", ":")))
 
     pathlib.Path(args.output_dir).mkdir(exist_ok=True)
+
 
     main(**kwargs)

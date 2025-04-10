@@ -29,11 +29,13 @@ def get_models(version="baseline"):
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # For mac
     if version == "baseline":
         dataset = "MNIST"
+        filename = "baseline_cnn_"
     else:
         dataset = "CIFAR10"
+        filename = "adv_cnn_2_"
     models = []
     for num in range(1,6):
-        model = load_model(version+"_cnn_"+str(num)+".pth", device, dataset=dataset)
+        model = load_model(filename+str(num)+".pth", device, dataset=dataset)
         models.append(model)
 
     return models, device

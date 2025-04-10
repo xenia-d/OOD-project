@@ -9,7 +9,7 @@ from Data.CIFAR10 import CIFAR10
 
 
 
-def train_model(model, train_data, val_data, device, epochs, print_interval=100):    
+def train_model(model, train_data, val_data, device, epochs, print_interval=500):    
     model.to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -17,9 +17,11 @@ def train_model(model, train_data, val_data, device, epochs, print_interval=100)
     for epoch in range(epochs):
         train_running_loss = 0.0
         val_running_loss = 0.0
+        val_accuracy = 0.0
         interval_start = time.time()
 
         for batch_i, (inputs, labels) in enumerate(train_data, 0):
+            model.train()
             inputs, labels = inputs.to(device), labels.to(device)
 
             optimizer.zero_grad()
@@ -35,12 +37,19 @@ def train_model(model, train_data, val_data, device, epochs, print_interval=100)
                 train_running_loss = 0.0
                 interval_start = time.time()
 
-        for inputs, labels in val_data: # Get val loss
+        for inputs, labels in val_data: # Get val loss and accuracy
+            model.eval()
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             val_loss = criterion(outputs, labels)
             val_running_loss += val_loss.item()
-        print(f'\t val loss: {val_running_loss / print_interval:.4f}')
+            _, predicted = torch.max(outputs.data, 1)
+            total = labels.size(0)
+            correct = (predicted == labels).sum().item()
+            val_accuracy += correct / total
+        val_accuracy /= len(val_data)
+            
+        print(f'\t val loss: {val_running_loss / print_interval:.4f}, val accuracy: {val_accuracy:.4f}')
 
 
 
@@ -78,14 +87,18 @@ def test_model(model, test_dataset, device):
 if __name__ == "__main__":
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # For mac
-    model = ResNet18()
-    model.to(device)
 
-    cifar_10_data = CIFAR10(batch_size=64)
-    cifar_10_train, cifar_10_val = cifar_10_data.get_train_val()
-    cifar_10_test = cifar_10_data.get_test()
+    for i in range(5):
+        print("Training iteration: ", i+1)
+        # Initialize the model
+        model = ResNet18()
+        model.to(device)
 
-    train_model(model, cifar_10_train, cifar_10_val, device, epochs=10)
-    test_model(model, cifar_10_test, device)
+        cifar_10_data = CIFAR10(batch_size=64)
+        cifar_10_train, cifar_10_val = cifar_10_data.get_train_val()
+        cifar_10_test = cifar_10_data.get_test()
 
-    torch.save(model.state_dict(), "Saved_Models/adv_cnn_5.pth")
+        train_model(model, cifar_10_train, cifar_10_val, device, epochs=20)
+        test_model(model, cifar_10_test, device)
+
+        torch.save(model.state_dict(), "Saved Models/adv_cnn_2_" + str(i+1) + ".pth")
