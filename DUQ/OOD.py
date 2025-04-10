@@ -68,28 +68,6 @@ def get_auroc_classification(dataset, model):
 
     return accuracy, roc_auc
 
-def get_mnist_fashionmnist_ood(model):
-    mnist = MNIST(batch_size=64)
-    fashionmnist = FashionMNIST(batch_size=64)
-    mnist_test = mnist.get_test()  
-    fashionmnist_test = fashionmnist.get_test()  
-
-    # print("MNIST Test Size:", len(mnist_test.dataset))
-    # print("FashionMNIST Test Size:", len(fashionmnist_test.dataset))
-
-    return get_auroc_ood(mnist_test, fashionmnist_test, model)
-
-def get_mnist_emnist_ood(model):
-    mnist = MNIST(batch_size=2000)
-    emnist = EMNIST(batch_size=2000)
-    mnist_test = mnist.get_test()  
-    emnist_test = emnist.get_test()  
-
-    # print("MNIST Test Size:", len(mnist_test.dataset))
-    # print("EMNIST Test Size:", len(emnist_test.dataset))
-
-    return get_auroc_ood(mnist_test, emnist_test, model)
-
 def get_cifar_svhn_ood(model):
     cifar10 = CIFAR10(batch_size=2000)
     svhn = SVHN(batch_size=2000)
