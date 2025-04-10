@@ -55,7 +55,7 @@ class CNN_DUQ(BaselineCNN_FeatureExtractor):
         return y_pred
 
     def update_embeddings(self, x, y):
-        z = self.last_layer(self.forward(x))  
+        z = self.last_layer(self.feature_extractor(x))  
 
         self.N = self.gamma * self.N + (1 - self.gamma) * y.sum(0)
 
