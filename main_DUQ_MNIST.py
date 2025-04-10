@@ -113,7 +113,7 @@ def train_model(l_gradient_penalty, length_scale, final_model, id_train, id_val,
 
 
 
-if __name__ == "__main__":
+def main():
     # Load id, near ood & far ood
     mnist = MNIST(batch_size=64)
     mnist_test_loader = mnist.get_test()
@@ -181,12 +181,15 @@ if __name__ == "__main__":
     for i, best_model in enumerate(best_models): 
         print("Evaluating best model OOD detection on test set, sigma:", best_sigma)
 
-        id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, fashion_test_loader, device)
+        id_scores, ood_scores = get_anomaly_targets_and_scores(best_model, mnist_test_loader, fashion_test_loader, device)
         plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs FashionMNIST (" + str(best_sigma) + ") " + str(i), method="DUQ", dist="MNIST")
 
-        id_scores, ood_scores = get_anomaly_targets_and_scores(model, mnist_test_loader, emnist_test_loader, device)
+        id_scores, ood_scores = get_anomaly_targets_and_scores(best_model, mnist_test_loader, emnist_test_loader, device)
         plot_roc_curve(id_scores, ood_scores, "DUQ -- MNIST vs EMNIST (" + str(best_sigma) + ") " + str(i), method="DUQ", dist="MNIST")
 
         torch.save(best_model.state_dict(), "Saved Models/baseline_duq_" + str(i) + ".pth")
 
     print(results)
+
+main()
+
