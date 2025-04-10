@@ -54,7 +54,7 @@ def new_metric(nn, num):
         folder_name = 'baseline_cnn'
         name_list = ["MNIST", "EMNIST", "FashionMNIST"]
         near_dataset = "EMNIST"
-        far_dataset = "Fashion MNIST"
+        far_dataset = "FashionMNIST"
         dist = "MNIST"
 
     # open a file to log results
