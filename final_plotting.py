@@ -113,7 +113,7 @@ def plot_all_rocs():
     df = make_dataframe()
 
     for dataset in df["ID Dataset"].unique():
-        plt.figure(figsize=(10, 8))
+        plt.figure(figsize=(6, 5))
         title = "ROC Curves for Different Methods on " + dataset + " (ID)"
         plotted_combos = []
         for row in df[df["ID Dataset"] == dataset].iterrows():
@@ -144,4 +144,4 @@ def plot_all_rocs():
 
 plot_all_rocs()
 make_barplot("MNIST")
-make_barplot("CIFAR10")
+# make_barplot("CIFAR10")
