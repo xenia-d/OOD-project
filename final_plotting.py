@@ -63,22 +63,28 @@ def make_dataframe():
             files = os.listdir(dataset_path)
             for file in files:
                 if file.endswith(".npz"):
-                    print(file)
+                    # print(file)
                     ood_dataset, distance = get_ood_dataset_name(file)
                     data = np.load(os.path.join(dataset_path, file))
                     fpr = data['fpr']
                     tpr = data['tpr']
                     roc_auc = np.trapz(tpr, fpr)
+                    if method == "Baseline":
+                        method = "Entropy"
+                    if method == "Conf":
+                        method = "Confidence"
                     # print(f"Method: {method}, ID Dataset: {dataset}, OOD Dataset: {ood_dataset}, AUROC: {roc_auc}, Distance: {distance}")
                     rows.append({
                         "Method": method,
                         "ID Dataset": dataset,
                         "OOD Dataset": ood_dataset,
+                        "TPR": tpr,
+                        "FPR": fpr,
                         "AUROC": roc_auc,
                         "Distance": distance
                     })
-    df = pd.DataFrame(rows, columns=["Method", "ID Dataset", "OOD Dataset", "AUROC", "Distance"])
-    print(df[df["Method"] == "DUQ"])
+    df = pd.DataFrame(rows, columns=["Method", "ID Dataset", "OOD Dataset", "TPR", "FPR", "AUROC", "Distance"])
+    # print(df[df["Method"] == "DUQ"])
     return df
 
 def make_barplot(target_dataset=None):
@@ -98,38 +104,44 @@ def make_barplot(target_dataset=None):
     ax.set_title(f"AUROC for Different Methods on {target_dataset} Dataset")
     diff = df["AUROC"].max() - df["AUROC"].min()
     ax.set(ylim=(min(df["AUROC"]-(0.1*diff)), 1))
+    plt.tight_layout()
     plt.show()
 
 def plot_all_rocs():
-    datasets = ["MNIST", "CIFAR10"]
-    colors = ['b', 'g', 'm', 'r', 'c']
+    colors = ['b', 'g', 'm', 'r', 'c', 'yellow']
 
-    for dataset in datasets:
-        rocs = load_all_rocs(dataset)
-        title = 'ROC Curves for Different Methods on ' + dataset
+    df = make_dataframe()
 
+    for dataset in df["ID Dataset"].unique():
         plt.figure(figsize=(10, 8))
-        for i, (fpr, tpr, dataset, method, ood_type) in enumerate(rocs):
-
+        title = "ROC Curves for Different Methods on " + dataset + " (ID)"
+        plotted_combos = []
+        for row in df[df["ID Dataset"] == dataset].iterrows():
+            num, (method, _, _, tpr, fpr, _, ood_type) = row
             # Clean up method names for plotting
             if method == "Baseline":
                 method = "Entropy"
             if method == "Conf":
                 method = "Confidence"
+            if ((method, ood_type)) not in plotted_combos: # only plot one per combo
+                i = len(plotted_combos)
+                if ood_type == "Near OOD":
+                    plt.plot(fpr, tpr, colors[int(i/2)] + '-', label=f"{method} -- ({ood_type})")
+                else:
+                    plt.plot(fpr, tpr, colors[int(i/2)] + '--', label=f"{method} -- ({ood_type})")
+                plotted_combos.append((method, ood_type))
 
-            if ood_type == "Near OOD":
-                plt.plot(fpr, tpr, colors[int(i/2)] + '-', label=f"{method} -- ({ood_type})")
-            else:
-                plt.plot(fpr, tpr, colors[int(i/2)] + '--', label=f"{method} -- ({ood_type})")
         plt.plot([0, 1], [0, 1], 'k:')
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
         plt.title(title)
+        plt.tight_layout()
         plt.legend()
         plt.savefig("Saved Plots/Overall/"+title)
         plt.show()
 
                 
 
-# plot_all_rocs()
+plot_all_rocs()
 make_barplot("MNIST")
+make_barplot("CIFAR10")
