@@ -99,7 +99,8 @@ def make_barplot(target_dataset=None):
         data=df,
         x="Distance",
         y="AUROC",
-        hue="Method"
+        hue="Method",
+        errorbar="se"
     )
     ax.set_title(f"AUROC for Different Methods on {target_dataset} Dataset")
     diff = df["AUROC"].max() - df["AUROC"].min()
@@ -143,6 +144,6 @@ def plot_all_rocs():
 
                 
 
-plot_all_rocs()
+# plot_all_rocs()
 make_barplot("MNIST")
 # make_barplot("CIFAR10")
