@@ -31,7 +31,7 @@ def main(
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # For Mac
 
-    writer = SummaryWriter(log_dir=f"runs/{output_dir}")
+    # writer = SummaryWriter(log_dir=f"runs/{output_dir}")
 
     cifar10 = CIFAR10(batch_size=batch_size)
     cifar_train_dataset, cifar_val_dataset = cifar10.get_train_val()
@@ -206,23 +206,23 @@ def main(
 
         print(f"Train - Epoch: {trainer.state.epoch} Loss: {loss:.2f}")
 
-        writer.add_scalar("Loss/train", loss, trainer.state.epoch)
+        # writer.add_scalar("Loss/train", loss, trainer.state.epoch)
 
         if trainer.state.epoch > (epochs - 5):
             accuracy, auroc = get_cifar_svhn_ood(model)
             print(f"Test Accuracy CIFAR10-SVHN: {accuracy}, AUROC: {auroc}")
-            writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
-            writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
+            # writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
+            # writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
 
             accuracy, auroc = get_cifar_cifar100_ood(model)
             print(f"Test Accuracy CIFAR10-CIFAR100: {accuracy}, AUROC: {auroc}")
-            writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
-            writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
+            # writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
+            # writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
 
-            accuracy, auroc = get_auroc_classification(cifar_val_dataset, model)
-            print(f"AUROC - uncertainty: {auroc}")
-            writer.add_scalar("OoD/val_accuracy", accuracy, trainer.state.epoch)
-            writer.add_scalar("OoD/roc_auc_classification", auroc, trainer.state.epoch)
+            # accuracy, auroc = get_auroc_classification(cifar_val_dataset, model)
+            # print(f"AUROC - uncertainty: {auroc}")
+            # writer.add_scalar("OoD/val_accuracy", accuracy, trainer.state.epoch)
+            # writer.add_scalar("OoD/roc_auc_classification", auroc, trainer.state.epoch)
 
         evaluator.run(cifar_val_dataset)
         metrics = evaluator.state.metrics
@@ -241,10 +241,10 @@ def main(
             )
         )
 
-        writer.add_scalar("Loss/valid", loss, trainer.state.epoch)
-        writer.add_scalar("BCE/valid", bce, trainer.state.epoch)
-        writer.add_scalar("GP/valid", GP, trainer.state.epoch)
-        writer.add_scalar("Accuracy/valid", acc, trainer.state.epoch)
+        # writer.add_scalar("Loss/valid", loss, trainer.state.epoch)
+        # writer.add_scalar("BCE/valid", bce, trainer.state.epoch)
+        # writer.add_scalar("GP/valid", GP, trainer.state.epoch)
+        # writer.add_scalar("Accuracy/valid", acc, trainer.state.epoch)
 
         scheduler.step()
 
@@ -255,7 +255,7 @@ def main(
     print(f"Test - Accuracy {acc:.4f}")
 
     torch.save(model.state_dict(), f"DUQ - CIFAR runs/{output_dir}/model.pt")
-    writer.close()
+    # writer.close()
 
 
 if __name__ == "__main__":
