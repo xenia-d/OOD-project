@@ -56,10 +56,10 @@ def get_auroc_ood(true_dataset, ood_dataset, model, device):
 
     return accuracy, roc_auc
 
-def get_auroc_classification(dataset, model):
-    dataloader = torch.utils.data.DataLoader(
-        dataset, batch_size=500, shuffle=False, num_workers=0, pin_memory=False
-    )
+def get_auroc_classification(dataloader, model):
+    # dataloader = torch.utils.data.DataLoader(
+    #     dataset, batch_size=500, shuffle=False, num_workers=0, pin_memory=False
+    # )
 
     scores, accuracies = loop_over_dataloader(model, dataloader)
 

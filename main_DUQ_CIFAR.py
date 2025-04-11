@@ -219,8 +219,8 @@ def main(
             # writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
             # writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
 
-            accuracy, auroc = get_auroc_classification(cifar_val_dataset, model)
-            print(f"AUROC - uncertainty: {auroc}")
+            # accuracy, auroc = get_auroc_classification(cifar_val_dataset, model)
+            # print(f"AUROC - uncertainty: {auroc}")
             # writer.add_scalar("OoD/val_accuracy", accuracy, trainer.state.epoch)
             # writer.add_scalar("OoD/roc_auc_classification", auroc, trainer.state.epoch)
 
