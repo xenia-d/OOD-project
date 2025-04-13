@@ -77,7 +77,7 @@ def train_model(l_gradient_penalty, length_scale, final_model, id_train, id_val,
     Accuracy(output_transform=output_transform_acc).attach(evaluator, "accuracy")
     Loss(F.cross_entropy, output_transform=output_transform_bce).attach(evaluator, "loss")
 
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 20], gamma=0.2)
+    # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 20], gamma=0.2)
 
     pbar = ProgressBar()
     pbar.attach(trainer)
