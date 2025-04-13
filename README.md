@@ -77,11 +77,13 @@ for the MNIST experiment:
 python main_DUQ_MNIST.py
 ```
 
-for the CIFAR10 experiment:
+For the CIFAR10 experiment it is rather computationally expensive. If running on your local computer it can be run with:
 
 ```
 python main_DUQ_CIFAR.py
 ```
+
+However, we recommmend running the job script 
 
 Performing OOD detection for the CIFAR experiment is done in a separate file, under the folder "DUQ", adn assumes you have pretrained models of the DUQ method saved in the "Saved Models" folder. Once you are in the DUQ folder, the OOD detection can  be run with the following command:
 
