@@ -6,7 +6,13 @@ In this project we implement 5 uncertainty quantification-grounded methods for O
 1. How do various out-of-distribution (OOD) methods compare in terms of (Near and Far) OOD detection abilities?
 2. How does Far OOD detection performance compare to Near OOD detection?
 
-We implement 2 experiments;A basic and an advanced experiment. Both experiments train a model on an in-distribution class (ID) and evaluate OOD detection on a Near-OOD and Far-OOD dataset. Our results show that DUQ has consistently detected OOD well for both Near and Far-OOD, while ODIN has perfomed relatively poorly on both Near and Far-OOD, across both experiments. 
+We implement 2 experiments;A basic and an advanced experiment. Both experiments train a model on an in-distribution class (ID) and evaluate OOD detection on a Near-OOD and Far-OOD dataset. 
+
+- For the basic experiment, we trained a custom CNN on the MNIST dataset, and evaluated OOD detection on FashionMNIST (Far-OOD) and EMNIST (Near-OOD)
+
+- For the advanced experiment, we trained a Resent18 model on the CIFAR10 dataset, and evaluated OOD detection on SVHN (Far-OOD) and hand selected classes from CIFAR-100 (Near-OOD).
+
+Our results show that DUQ has consistently detected OOD well for both Near and Far-OOD, while ODIN has perfomed relatively poorly on both Near and Far-OOD, across both experiments. 
 
 ## Acknowledgements
 Below is a overview of where code was used directly or as inspiration from other sources.
