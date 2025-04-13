@@ -1,6 +1,12 @@
 # A Comparison of Out-of-Distribution (OOD) Detection Methods for Near and Far OOD
 
-add paper abstract here
+The code in this repository is the implementation for the project titled "Comparing OOD Detection Methods on Near and Far OOD" for the course "Trusthworthy and Explainable AI". In safety critical applications, machine learning models should be able to detect encounters of unknown classes to alert users to conduct human evaluations. Such samples are referred to as "out-of-distribution" (OOD) and significantluy deviate from the training set of a machine learning model. However, identifying OOD samples come at various difficulties which can be broadly categorized into "Near-OOD" (the OOD sample is either perceptually or semantically dissimilar to the inlier classes) or "Far-OOD" (the OOD sample is both perceptually and semantically dissimilar to the inlier classes).
+In this project we implement 5 uncertainty quantification-grounded methods for OOD detection: Maximum Confidence, Shannon Entropy, Ensembles, ODIN and DUQ to address the following research questions:
+
+1. How do various out-of-distribution (OOD) methods compare in terms of (Near and Far) OOD detection abilities?
+2. How does Far OOD detection performance compare to Near OOD detection?
+
+We implement 2 experiments;A basic and an advanced experiment. Both experiments train a model on an in-distribution class (ID) and evaluate OOD detection on a Near-OOD and Far-OOD dataset. Our results show that DUQ has consistently detected OOD well for both Near and Far-OOD, while ODIN has perfomed relatively poorly on both Near and Far-OOD, across both experiments. 
 
 ## Acknowledgements
 Below is a overview of where code was used directly or as inspiration from other sources.
