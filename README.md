@@ -68,5 +68,27 @@ This also requires the baseline models on MNIST and CIFAR10 to be trained. This 
 python main_ensemble_and_entropy.py
 ```
 
+### DUQ Experiments 
+Contrary to the above methods, DUQ does not require baseline models to be trained. This method instead trains a feature extractor based on the baseline model architectures (without the final layers) to obtain learnable centroids for the method. For the  MNIST and CIFAR experiments, these have separate main files to run. To run the DUQ experiments:
+
+for the MNIST experiment:
+
+```
+python main_DUQ_MNIST.py
+```
+
+for the CIFAR10 experiment:
+
+```
+python main_DUQ_CIFAR.py
+```
+
+Performing OOD detection for the CIFAR experiment is done in a separate file, under the folder "DUQ", adn assumes you have pretrained models of the DUQ method saved in the "Saved Models" folder. Once you are in the DUQ folder, the OOD detection can  be run with the following command:
+
+```
+python perform_OOD_CIFAR.py
+```
+
+
 ## Plotting
 Plots (such as ROC comparisons and bar plot of average AUROCs) can be achieved using the functions in **final_plotting.py**.

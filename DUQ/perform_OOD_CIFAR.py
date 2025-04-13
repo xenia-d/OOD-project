@@ -1,12 +1,15 @@
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import torch 
 import torch.nn as nn
 from torchvision.models import resnet18
-from DUQ.OOD import get_auroc_ood, get_anomaly_targets_and_scores
-from DUQ.OOD import get_cifar_svhn_ood, get_cifar_cifar100_ood, get_auroc_classification
-from Data import FashionMNIST, EMNIST, SVHN, CIFAR10, MNIST, CIFAR100
+from OOD import get_anomaly_targets_and_scores
+from Data import SVHN, CIFAR10, CIFAR100
 from Utils.utils import plot_roc_curve, get_best_model_idx
-from DUQ.DUQ import ResNet_DUQ
-
+from DUQ import ResNet_DUQ
 
 model_output_size = 512
 feature_extractor = resnet18()
