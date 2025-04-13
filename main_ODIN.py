@@ -1,17 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2017-present, Facebook, Inc.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-#
-
-
-"""
-Created on Sat Sep 19 20:55:56 2015
-
-@author: liangshiyu
-"""
+# Adapted from https://github.com/facebookresearch/odin
 
 from __future__ import print_function
 import argparse

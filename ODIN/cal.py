@@ -1,16 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2017-present, Facebook, Inc.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-#
-
-"""
-Created on Sat Sep 19 20:55:56 2015
-
-@author: liangshiyu
-"""
+# Adapted from https://github.com/facebookresearch/odin
 
 from __future__ import print_function
 import torch
@@ -28,7 +16,7 @@ from Data import FashionMNIST, EMNIST, SVHN, CIFAR10, MNIST, CIFAR100
 from Model_Architecture.Adv_CNN import ResNet18
 from . import calMetric as m
 from . import calData as d
-from .baseline_cnn_logits import BaselineCNN
+from Model_Architecture.baseline_cnn import BaselineCNN_LOGITS_ONLY
 
 start = time.time()
 
@@ -63,7 +51,7 @@ def test(nnName, CUDA_DEVICE, metrics_only, model_num, epsilon, temperature, bat
     
     for n in model_list:
         if nnName == "BASELINE_CNN" : 
-            net1 = BaselineCNN()
+            net1 = BaselineCNN_LOGITS_ONLY()
             model_name = 'baseline_cnn_'
         elif nnName == "ADVANCED_CNN" :
             net1 = ResNet18()
