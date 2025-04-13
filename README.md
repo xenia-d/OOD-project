@@ -83,7 +83,7 @@ For the CIFAR10 experiment it is rather computationally expensive. If running on
 python main_DUQ_CIFAR.py
 ```
 
-However, we recommmend running the job script 
+However, we recommmend running the job script "job_DUQ_advanced.py" on Habrok, as we have done for this project. 
 
 Performing OOD detection for the CIFAR experiment is done in a separate file, under the folder "DUQ", adn assumes you have pretrained models of the DUQ method saved in the "Saved Models" folder. Once you are in the DUQ folder, the OOD detection can  be run with the following command:
 
