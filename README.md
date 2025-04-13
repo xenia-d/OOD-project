@@ -14,7 +14,7 @@ For a quick run the plotting can be directly run from the saved results as expla
 To rerun the experiments each method is explained below.
 
 ### Model Training
-Trained models are already saved, but a new model can be trained as explained below.
+Trained models are already saved, but a new model can be trained as explained below. This will automatically download the respecitve dataset, and it may take some time to train.
 
 For MNIST:
 ```
