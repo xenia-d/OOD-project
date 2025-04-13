@@ -103,7 +103,7 @@ python main_DUQ_CIFAR.py --architecture ResNet18 --batch_size 128 --length_scale
 
 However, we recommmend running the job script "job_DUQ_advanced.py" on Habrok, as we have done for this project, since this particular process is quite computationally expensive. 
 
-Performing OOD detection for the CIFAR experiment is done in a separate file, under the folder "DUQ", adn assumes you have pretrained models of the DUQ method saved in the "Saved Models" folder. Once you are in the DUQ folder, the OOD detection can  be run with the following command:
+Performing OOD detection for the CIFAR experiment is done in a separate file, under the folder "DUQ", and assumes you have pretrained models of the DUQ method saved in the "Saved Models" folder. Once you are in the DUQ folder, the OOD detection can  be run with the following command:
 
 ```
 python perform_OOD_CIFAR.py
