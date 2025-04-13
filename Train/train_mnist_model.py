@@ -4,18 +4,19 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader
-import torch.nn.functional as F
-from Model_Architecture.Baseline_CNN import BaselineCNN
 from sklearn.metrics import f1_score
+import argparse
+
+from Model_Architecture.baseline_cnn import BaselineCNN
 from Data.preprocess import inspect_class_distribution
 
 
-def train_model(model, train_data, device, epochs):
-    train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
+def train_model(model, train_data, device, epochs, batch_size, lr):
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     
     model.to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
     for epoch in range(epochs):
         running_loss = 0.0
@@ -67,6 +68,22 @@ def test_model(model, test_dataset, device):
     return accuracy, f1
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Train MNIST Model')
+    parser.add_argument('--batch_size', default=64, type=int,
+                        help='batch size')
+    parser.add_argument('--epochs', default=5, type=int,
+                        help='number of epochs to train')
+    parser.add_argument('--lr', default=0.001, type=float,
+                        help='learning rate')
+    parser.add_argument('--model_num', default=1, type=int,
+                        help='model number to save')
+    
+    args = parser.parse_args()
+    batch_size = args.batch_size
+    epochs = args.epochs
+    lr = args.lr
+    model_num = args.model_num
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = BaselineCNN()
     model.to(device)
@@ -78,7 +95,7 @@ if __name__ == "__main__":
     inspect_class_distribution(train_data, "Training Data Distribution")
     inspect_class_distribution(test_data, "Test Data Distribution")
 
-    train_model(model, train_data, device, epochs=5)
-    # test_model(model, test_data, device)
+    train_model(model, train_data, device, epochs, batch_size, lr)
+    test_model(model, test_data, device)
 
-    torch.save(model.state_dict(), "Saved_Models/baseline_cnn_5.pth")
+    torch.save(model.state_dict(), "Saved_Models/baseline_cnn_" + str(model_num) + ".pth")

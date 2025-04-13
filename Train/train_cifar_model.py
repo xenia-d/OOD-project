@@ -3,16 +3,17 @@ import torch.nn as nn
 import torch.optim as optim
 from sklearn.metrics import f1_score
 import time
+import argparse
 
 from Model_Architecture.Adv_CNN import ResNet18
 from Data.CIFAR10 import CIFAR10
 
 
 
-def train_model(model, train_data, val_data, device, epochs, print_interval=500):    
+def train_model(model, train_data, val_data, device, epochs, lr, print_interval=500):    
     model.to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
     for epoch in range(epochs):
         train_running_loss = 0.0
@@ -85,6 +86,19 @@ def test_model(model, test_dataset, device):
     return accuracy, f1
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Train MNIST Model')
+    parser.add_argument('--batch_size', default=64, type=int,
+                        help='batch size')
+    parser.add_argument('--epochs', default=20, type=int,
+                        help='number of epochs to train')
+    parser.add_argument('--lr', default=0.001, type=float,
+                        help='learning rate')
+    
+    args = parser.parse_args()
+    batch_size = args.batch_size
+    epochs = args.epochs
+    lr = args.lr
+
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # For mac
 
@@ -94,11 +108,11 @@ if __name__ == "__main__":
         model = ResNet18()
         model.to(device)
 
-        cifar_10_data = CIFAR10(batch_size=64)
+        cifar_10_data = CIFAR10(batch_size=batch_size)
         cifar_10_train, cifar_10_val = cifar_10_data.get_train_val()
         cifar_10_test = cifar_10_data.get_test()
 
-        train_model(model, cifar_10_train, cifar_10_val, device, epochs=20)
+        train_model(model, cifar_10_train, cifar_10_val, device, epochs=epochs, lr=lr)
         test_model(model, cifar_10_test, device)
 
         torch.save(model.state_dict(), "Saved Models/adv_cnn_2_" + str(i+1) + ".pth")
