@@ -1,4 +1,4 @@
-### All code below (except where explicitly indicated) is from this repository 
+### All code below is from this repository 
 ### https://github.com/kuangliu/pytorch-cifar/blob/master/models/resnet.py
 
 '''ResNet in PyTorch.

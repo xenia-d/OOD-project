@@ -2,9 +2,29 @@
 
 add paper abstract here
 
+## Acknowledgements
+Below is a overview of where code was used directly or as inspiration from other sources.
+- The code for the ResNet18 was taken from "https://github.com/kuangliu/pytorch-cifar/blob/master/models/resnet.py", this is also mentioned in its folder *Model_Architecture/Adv_CNN.py*.
+- The code for the MNIST model was inspired from "https://github.com/pytorch/examples/blob/main/mnist/main.py", mentioned in *Model_Architecture/baseline_CNN.py*.
+- DUQ specific code was adapted from "https://github.com/y0ast/deterministic-uncertainty-quantification", it was used as a base, but altered to match our experimentation.
+- ODIN specific code was adapted from "https://github.com/facebookresearch/odin", again it was used as a base, but altered to match our experimentation.
+
 ## General Setup
 Please setup a venv and install the requirements.txt.
 All our trained models can be found under Saved Models.
+
+## Repository Overview
+All the main files for running experiments and plotting results are directly under the root. Below is an overview of each folder.
+*Data* contains classes for each dataset and is where the datasets will download. 
+*DUQ* contains code for running DUQ.
+*Model_Architecture* contains the model architectures for the MNIST model and ResNet18 model.
+*ODIN* contains code for running ODIN.
+*Saved Images* contains a sample of input images from each dataset.
+*Saved Models* contains the saved models for MNIST, CIFAR10 and DUQ.
+*Saved Plots* contains plots for each method on each dataset and the *Overall* plots comparing all method and datasets
+*Saved Rocks* contains the saved TPR and FPR from the ROC curve for each ID/OOD dataset pair and method.
+*Train* contains the scripts to train the baseline models for MNIST and CIFAR10
+*Utils* contains extra auxiliary functions
 
 ## Running Experiments
 The results of all experiments are already saved. This is done in the form of saving the TPR and FPR from the ROC plot for each method and each pair of in-distribution (ID) and OOD datasets. These results can be found under the *Saved Rocks* folder, where each method has a folder, and within there is a folder for the basic experiment (with MNIST as ID) and the advanced experiment (with CIFAR10 as ID). Where applicable the results of the 5 trials are saved.

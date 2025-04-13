@@ -1,1 +1,0 @@
-this is for saving results and plots - this readme can be deleted later
