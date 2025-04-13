@@ -5,15 +5,15 @@ import random
 import torch
 import torch.nn.functional as F
 import torch.utils.data
-from torch.utils.tensorboard.writer import SummaryWriter
 from torchvision.models import resnet18
 from ignite.engine import Events, Engine
 from ignite.metrics import Accuracy, Average, Loss
 from ignite.contrib.handlers import ProgressBar
 from DUQ.DUQ import ResNet_DUQ
 from DUQ.OOD import get_cifar_svhn_ood, get_cifar_cifar100_ood, get_auroc_classification
-from Data import FashionMNIST, EMNIST, SVHN, CIFAR10, MNIST, CIFAR100
-
+from Data.CIFAR100 import CIFAR100
+from Data.SVHN import SVHN
+from Data.CIFAR10 import CIFAR10 
 
 
 def main(
@@ -26,14 +26,10 @@ def main(
     gamma,
     weight_decay,
     final_model,
-    output_dir
+    output_dir,
 ):
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # For Mac
 
-    # writer = SummaryWriter(log_dir=f"runs/{output_dir}")
-
-    cifar10 = CIFAR10(batch_size=batch_size)
+    cifar10 = CIFAR10(batch_size=64)
     cifar_train_dataset, cifar_val_dataset = cifar10.get_train_val()
     cifar_test_dataset = cifar10.get_test()
 
@@ -62,7 +58,7 @@ def main(
         feature_extractor = WideResNet()
     elif architecture == "ResNet18":
         model_output_size = 512
-        epochs = 10
+        epochs = 100
         milestones = [25, 50, 75]
         feature_extractor = resnet18()
 
@@ -86,6 +82,7 @@ def main(
         gamma,
     )
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
     optimizer = torch.optim.SGD(
@@ -187,18 +184,6 @@ def main(
 
     kwargs = {"num_workers": 0, "pin_memory": True}
 
-    # train_loader = torch.utils.data.DataLoader(
-    #     train_dataset, batch_size=batch_size, shuffle=True, drop_last=True, **kwargs
-    # )
-
-    # val_loader = torch.utils.data.DataLoader(
-    #     val_dataset, batch_size=batch_size, shuffle=False, **kwargs
-    # )
-
-    # test_loader = torch.utils.data.DataLoader(
-    #     test_dataset, batch_size=batch_size, shuffle=False, **kwargs
-    # )
-
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_results(trainer):
         metrics = trainer.state.metrics
@@ -206,23 +191,15 @@ def main(
 
         print(f"Train - Epoch: {trainer.state.epoch} Loss: {loss:.2f}")
 
-        # writer.add_scalar("Loss/train", loss, trainer.state.epoch)
 
         if trainer.state.epoch > (epochs - 5):
-            accuracy, auroc = get_cifar_svhn_ood(model)
+            accuracy, auroc = get_cifar_svhn_ood(model, device)
             print(f"Test Accuracy CIFAR10-SVHN: {accuracy}, AUROC: {auroc}")
-            # writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
-            # writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
-
-            accuracy, auroc = get_cifar_cifar100_ood(model)
+            accuracy, auroc = get_cifar_cifar100_ood(model, device)
             print(f"Test Accuracy CIFAR10-CIFAR100: {accuracy}, AUROC: {auroc}")
-            # writer.add_scalar("OoD/test_accuracy", accuracy, trainer.state.epoch)
-            # writer.add_scalar("OoD/roc_auc", auroc, trainer.state.epoch)
 
-            # accuracy, auroc = get_auroc_classification(cifar_val_dataset, model)
-            # print(f"AUROC - uncertainty: {auroc}")
-            # writer.add_scalar("OoD/val_accuracy", accuracy, trainer.state.epoch)
-            # writer.add_scalar("OoD/roc_auc_classification", auroc, trainer.state.epoch)
+            accuracy, auroc = get_auroc_classification(cifar_val_dataset, model, device)
+
 
         evaluator.run(cifar_val_dataset)
         metrics = evaluator.state.metrics
@@ -241,10 +218,6 @@ def main(
             )
         )
 
-        # writer.add_scalar("Loss/valid", loss, trainer.state.epoch)
-        # writer.add_scalar("BCE/valid", bce, trainer.state.epoch)
-        # writer.add_scalar("GP/valid", GP, trainer.state.epoch)
-        # writer.add_scalar("Accuracy/valid", acc, trainer.state.epoch)
 
         scheduler.step()
 
@@ -254,19 +227,19 @@ def main(
 
     print(f"Test - Accuracy {acc:.4f}")
 
-    torch.save(model.state_dict(), f"DUQ - CIFAR runs/{output_dir}/model.pt")
-    # writer.close()
+    torch.save(model.state_dict(), f"{output_dir}/model.pt")
+
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     cifar100 = CIFAR100(batch_size=64)
-    cifar100_train_dataset, cifar100_val_dataset = cifar100.get_train_val()
+    cifar100_train_dataset, cifar100_val_dataset = cifar100.get_train()
     cifar100_test_dataset = cifar100.get_test()
 
     svhn = SVHN(batch_size=64)
-    svhn_train_dataset, svhn_val_dataset = svhn.get_train_val()
+    svhn_train_dataset, svhn_val_dataset = svhn.get_train()
     svhn_test_dataset = svhn.get_test()
 
     parser.add_argument(
@@ -279,7 +252,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=64,
+        default=128,
         help="Batch size to use for training (default: 128)",
     )
 
@@ -323,9 +296,8 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--output_dir", type=str, default="results", help="set output folder"
+        "--output_dir", type=str, default="DUQ_CIFAR_Results", help="set output folder"
     )
-
 
     # Below setting cannot be used for model selection,
     # because the validation set equals the test set.
@@ -341,6 +313,5 @@ if __name__ == "__main__":
     print("input args:\n", json.dumps(kwargs, indent=4, separators=(",", ":")))
 
     pathlib.Path(args.output_dir).mkdir(exist_ok=True)
-
 
     main(**kwargs)

@@ -1,12 +1,11 @@
 import numpy as np
 import torch
 from sklearn.metrics import roc_auc_score
-from Data import FashionMNIST, EMNIST, SVHN, CIFAR10, MNIST, CIFAR100
+from Data import SVHN, CIFAR10, CIFAR100
 
 def prepare_ood_datasets(true_dataset, ood_dataset):
     true_dataset_object = true_dataset.dataset
     ood_dataset_object = ood_dataset.dataset
-    # ood_dataset_object.transform = true_dataset_object.transform
 
     datasets = [true_dataset_object, ood_dataset_object]
 
@@ -57,10 +56,6 @@ def get_auroc_ood(true_dataset, ood_dataset, model, device):
     return accuracy, roc_auc
 
 def get_auroc_classification(dataloader, model):
-    # dataloader = torch.utils.data.DataLoader(
-    #     dataset, batch_size=500, shuffle=False, num_workers=0, pin_memory=False
-    # )
-
     scores, accuracies = loop_over_dataloader(model, dataloader)
 
     accuracy = np.mean(accuracies)
@@ -74,9 +69,6 @@ def get_cifar_svhn_ood(model):
     cifar10_test = cifar10.get_test()  
     svhn_test = svhn.get_test()  
 
-    # print("CIFAR10 Test Size:", len(cifar10_test.dataset))
-    # print("SVHN Test Size:", len(svhn_test.dataset))
-
     return get_auroc_ood(cifar10_test, svhn_test, model)
 
 def get_cifar_cifar100_ood(model):
@@ -84,9 +76,6 @@ def get_cifar_cifar100_ood(model):
     cifar100 = CIFAR100(batch_size=2000)
     cifar10_test = cifar10.get_test()  
     cifar100_test = cifar100.get_test()  
-
-    # print("CIFAR10 Test Size:", len(cifar10_test.dataset))
-    # print("CIFAR100 Test Size:", len(cifar100_test.dataset))
 
     return get_auroc_ood(cifar10_test, cifar100_test, model)
 

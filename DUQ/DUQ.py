@@ -17,8 +17,6 @@ class CNN_DUQ(BaselineCNN_FeatureExtractor):
         super().__init__()
 
         self.gamma = gamma
-
-        # W has shape: [embedding_size, num_classes, feature_dim (128)]
         self.W = nn.Parameter(
             torch.normal(torch.zeros(embedding_size, num_classes, 128), 0.05)
         )
@@ -39,7 +37,6 @@ class CNN_DUQ(BaselineCNN_FeatureExtractor):
         return torch.einsum("ij,mnj->imn", z, self.W)
 
     def output_layer(self, z):
-        # Compute mean embedding per class
         embeddings = self.m / self.N.unsqueeze(0) 
 
         # Compare z to each class embedding
@@ -59,8 +56,7 @@ class CNN_DUQ(BaselineCNN_FeatureExtractor):
 
         self.N = self.gamma * self.N + (1 - self.gamma) * y.sum(0)
 
-        # compute sum of embeddings on class by class basis
-        features_sum = torch.einsum("ijk,ik->jk", z, y)  # weighted sum per class
+        features_sum = torch.einsum("ijk,ik->jk", z, y) 
         self.m = self.gamma * self.m + (1 - self.gamma) * features_sum
 
 

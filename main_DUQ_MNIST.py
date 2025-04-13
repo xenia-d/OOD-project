@@ -11,7 +11,6 @@ from Utils.utils import plot_roc_curve, get_best_model_idx
 
 import matplotlib.pyplot as plt
 
-
 def train_model(l_gradient_penalty, length_scale, final_model, id_train, id_val, near_ood_val, far_ood_val, device):
     mnist_train_loader, mnist_val_loader = id_train, id_val
 
@@ -41,7 +40,7 @@ def train_model(l_gradient_penalty, length_scale, final_model, id_train, id_val,
 
     def output_transform_acc(output):
         y_pred, y = output
-        return y_pred, torch.argmax(y, dim=1) # y_pred, y
+        return y_pred, torch.argmax(y, dim=1)
 
     def step(engine, batch):
         model.train()
@@ -53,7 +52,6 @@ def train_model(l_gradient_penalty, length_scale, final_model, id_train, id_val,
         x, y = x.to(device), y.to(device)  
 
         y_pred = model(x)
-        # loss = F.cross_entropy(y_pred, y)  # target should NOT be one-hot
         loss = F.binary_cross_entropy(y_pred, y)
         loss.backward()
         optimizer.step()
@@ -161,7 +159,7 @@ def main():
                 val_roc_aucs_fashionmnist.append(val_roc_auc_fashionmnist)
                 val_roc_aucs_emnist.append(val_roc_auc_emnist)
 
-                models.append(model) # Save the model for later use
+                models.append(model) 
 
 
             results[f"lgp{l_gradient_penalty}_ls{length_scale}"] = [
@@ -176,7 +174,7 @@ def main():
     # Test on model with best validation ood detection
     best_model_on_val_idx = get_best_model_idx(model_ood_aurocs)
     best_sigma = length_scales[best_model_on_val_idx % len(length_scales)]
-    best_models = all_models[best_model_on_val_idx] # List of models unless repetition is 1
+    best_models = all_models[best_model_on_val_idx] 
 
     for i, best_model in enumerate(best_models): 
         print("Evaluating best model OOD detection on test set, sigma:", best_sigma)
