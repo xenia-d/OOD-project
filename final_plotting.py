@@ -105,6 +105,7 @@ def make_barplot(target_dataset=None):
     ax.set_title(f"AUROC for Different Methods on {target_dataset} Dataset")
     diff = df["AUROC"].max() - df["AUROC"].min()
     ax.set(ylim=(min(df["AUROC"]-(0.1*diff)), 1))
+    plt.grid(False)
     plt.tight_layout()
     plt.savefig("Saved Plots/Overall/"+f"AUROC for Different Methods on {target_dataset} Dataset")
     plt.show()
@@ -144,6 +145,6 @@ def plot_all_rocs():
 
                 
 
-# plot_all_rocs()
+plot_all_rocs()
 make_barplot("MNIST")
-# make_barplot("CIFAR10")
+make_barplot("CIFAR10")
