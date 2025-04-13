@@ -89,13 +89,19 @@ for the MNIST experiment:
 python main_DUQ_MNIST.py
 ```
 
-For the CIFAR10 experiment it is rather computationally expensive. If running on your local computer it can be run with:
+For the CIFAR10 experiment it is rather computationally expensive. In our project we used the default training settinsg as arguments found in "main_DUQ_CIFAR.py" If running on your local computer it can be run with:
 
 ```
 python main_DUQ_CIFAR.py
 ```
 
-However, we recommmend running the job script "job_DUQ_advanced.py" on Habrok, as we have done for this project. 
+However, to make use of the argparsers to easily change parameters, you may also run the script like this:
+
+```
+python main_DUQ_CIFAR.py --architecture ResNet18 --batch_size 128 --length_scale 0.1 --centroid_size 512 --learning_rate 0.05 --l_gradient_penalty 0.75 --gamma 0.999 --weight_decay 0.0005 --output_dir DUQ_CIFAR_Results
+```
+
+However, we recommmend running the job script "job_DUQ_advanced.py" on Habrok, as we have done for this project, since this particular process is quite computationally expensive. 
 
 Performing OOD detection for the CIFAR experiment is done in a separate file, under the folder "DUQ", adn assumes you have pretrained models of the DUQ method saved in the "Saved Models" folder. Once you are in the DUQ folder, the OOD detection can  be run with the following command:
 
